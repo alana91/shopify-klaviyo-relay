@@ -12,6 +12,13 @@ import (
 	"github.com/alana91/shopify-klaviyo-relay/store"
 )
 
+func TestNewKlaviyoClientHasTimeout(t *testing.T) {
+	c := NewKlaviyoClient("http://example.invalid", "test-key")
+	if c.http.Timeout == 0 {
+		t.Error("http.Client.Timeout = 0; a hung Klaviyo connection would stall the worker poll loop forever")
+	}
+}
+
 func TestKlaviyoSend(t *testing.T) {
 	var gotMethod, gotPath, gotAuth, gotRevision string
 	var gotBody []byte

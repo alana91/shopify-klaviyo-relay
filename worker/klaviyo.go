@@ -28,7 +28,7 @@ func NewKlaviyoClient(baseURL, apiKey string) *KlaviyoClient {
 	return &KlaviyoClient{
 		baseURL: baseURL,
 		apiKey:  apiKey,
-		http:    &http.Client{},
+		http:    &http.Client{Timeout: 30 * time.Second},
 	}
 }
 

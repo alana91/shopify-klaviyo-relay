@@ -44,6 +44,9 @@ func (w *Worker) processPending(ctx context.Context) error {
 		return fmt.Errorf("fetching pending events: %w", err)
 	}
 	for _, e := range events {
+		if ctx.Err() != nil {
+			break
+		}
 		w.process(ctx, e)
 	}
 	return nil
@@ -57,6 +60,11 @@ func (w *Worker) process(ctx context.Context, e store.PendingEvent) {
 	}
 
 	if err := w.klaviyo.Send(ctx, payload); err != nil {
+		if ctx.Err() != nil {
+			// Shutting down, not a forwarding failure: leave the event
+			// 'received' so it is retried on the next run.
+			return
+		}
 		w.markFailed(ctx, e, err.Error())
 		return
 	}
