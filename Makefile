@@ -1,4 +1,4 @@
-.PHONY: fmt lint tidy check build test test-docker generate up db-reset seed-db send-webhook help
+.PHONY: fmt lint tidy check build test test-docker up db-reset seed-db send-webhook help
 
 ifneq (,$(wildcard .env))
 include .env
@@ -27,9 +27,6 @@ test: ## Run tests with race detector (local; Postgres reached at localhost)
 
 test-docker: ## Run tests in a container on the compose network (Postgres reached at db)
 	docker compose run --rm test
-
-generate: ## Run sqlc code generation
-	sqlc generate
 
 up: ## Build and start docker-compose services
 	docker-compose up -d --build

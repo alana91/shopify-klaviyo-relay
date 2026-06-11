@@ -12,14 +12,29 @@
 - Structured logging with `log/slog` (JSON output) at every meaningful step
 - No comments unless the WHY is non-obvious
 
+## Data & Migrations
+
+- PostgreSQL via the **pgx** driver used through `database/sql` (driver name `"pgx"`); not pgx's native pool API
+- **Hand-written SQL** in `store/` — not sqlc
+- Migrations: **goose** as a library, files in `store/migrations/*.sql`, embedded and run via `store.Migrate`. Migrations **auto-run at startup** in `main.go` (no separate migrate step). `make db-reset` drops/recreates the local dev DB
+- Config: `config.Load` composes everything from env; `DBConfig.DSN()` builds the connection URL
+
 ## TDD Workflow
 
-1. Write a **single** test case — run it — watch it fail
-2. Write the minimum implementation to pass that one case only
-3. Ask user what to test next (suggestions welcome, decision is theirs)
-4. Add the next table row only after the previous case is green
+1. Write a **single** test case — **pause for the user to review it** before running or implementing
+2. Run it — watch it fail
+3. Write the minimum implementation to pass that one case only
+4. Ask user what to test next (suggestions welcome, decision is theirs)
+5. Add the next table row only after the previous case is green
 
 Use `t.Run()` table-driven tests built incrementally. Always run with `-race`.
+
+## Testing
+
+- Tests hit a **real PostgreSQL** and are **non-negotiable** — never skipped or gated
+- `internal/testdb.New` provisions a fresh, uniquely-named database per test, applies migrations, and drops it on cleanup
+- `make test` runs locally (Postgres at `localhost`); `make test-docker` runs in our own image on the compose network
+- Compare values with `==` / `slices.Equal` / `time.Time.Equal` — **no `reflect.DeepEqual`**
 
 ## Commit Messages
 

@@ -8,7 +8,6 @@ A Go HTTP service that receives Shopify `orders/create` webhook events, stores t
 - [Go 1.26](https://go.dev/dl/) — required for local development (`make test`, `make fmt`, etc.)
 - [golangci-lint](https://golangci-lint.run/docs/welcome/install/local/) — required for `make lint` and the pre-commit hook; must be on your `$PATH` after installation
 - [lefthook](https://github.com/evilmartians/lefthook/tree/master#install) — git hooks manager; run `lefthook install` once after cloning
-- [sqlc](https://docs.sqlc.dev/en/stable/overview/install.html) — required for `make generate` (regenerates type-safe query code from SQL)
 - A Klaviyo account (see below)
 
 ## Klaviyo test account setup
@@ -38,35 +37,36 @@ KLAVIYO_API_KEY=pk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ## Local setup
 
 ```bash
-# 1. Copy env template and fill in your values
+# 1. Copy env template and fill in your values (SHOPIFY_WEBHOOK_SECRET, KLAVIYO_API_KEY)
 cp .env.example .env
 
 # 2. Build and start services (app + PostgreSQL)
 make up
+```
 
-# 3. Apply the database schema
-make migrate
+The app applies database migrations automatically on startup, so there is no separate migrate step. To reset the local database to a clean slate (the schema is re-applied on the next start):
 
-# 4. Seed demo data
-make seed-db
-
-# 5. Open the event log
-open http://localhost:8080
+```bash
+make db-reset
 ```
 
 ## Sending a test webhook
+
+With the service running and `SHOPIFY_WEBHOOK_SECRET` set in your `.env`:
 
 ```bash
 make send-webhook
 ```
 
-This fires a fake Shopify `orders/create` payload with a valid HMAC signature. Watch the event log update in the browser as the worker picks it up and forwards it to Klaviyo.
+This fires a fake Shopify `orders/create` payload with a valid HMAC signature. The service verifies the signature, stores the order with status `received`, and returns the new event id as JSON.
 
 ## Development
 
 ```bash
-make help       # list all available targets
-make check      # fmt + tidy + lint
-make test       # run tests with race detector
-make generate   # regenerate sqlc query code
+make help        # list all available targets
+make check       # fmt + tidy + lint
+make test        # run tests with race detector (needs a local Postgres; run 'make up' first)
+make test-docker # run tests in a container on the compose network
 ```
+
+Tests talk to a real PostgreSQL — each test provisions its own ephemeral database (created and dropped automatically) and applies migrations to it. `make test` reaches Postgres at `localhost`; `make test-docker` runs the suite inside the compose network.

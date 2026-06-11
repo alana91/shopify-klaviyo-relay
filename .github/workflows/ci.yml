@@ -44,5 +44,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Prepare env
+        run: cp .env.example .env
+
       - name: Run tests
-        run: docker build --target tester .
+        run: make test-docker

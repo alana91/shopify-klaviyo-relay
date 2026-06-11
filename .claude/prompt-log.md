@@ -1203,3 +1203,9 @@ we need some sort of command to clean up the local db that we get up
 
 yes please
 
+---
+
+## 2026-06-11T14:34:09Z
+
+before we start vertical 2, I believe README and CLAUDE.md can be updated. Also, it's possible CI is broken now because of DB tests.
+
