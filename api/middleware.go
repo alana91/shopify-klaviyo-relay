@@ -6,10 +6,30 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"io"
+	"log/slog"
 	"net/http"
 
 	"github.com/alana91/shopify-klaviyo-relay/config"
 )
+
+// Recover catches a panic from a downstream handler, logs it, and replies with
+// a 500 so one bad request can't take the server down.
+func Recover(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			rec := recover()
+			if rec == nil {
+				return
+			}
+			if rec == http.ErrAbortHandler {
+				panic(rec)
+			}
+			slog.Error("panic recovered", "error", rec, "method", r.Method, "path", r.URL.Path)
+			http.Error(w, "internal error", http.StatusInternalServerError)
+		}()
+		next.ServeHTTP(w, r)
+	})
+}
 
 // maxWebhookBody caps the request body the HMAC middleware will buffer. The
 // whole body must be read to compute the signature, so an uncapped read lets an

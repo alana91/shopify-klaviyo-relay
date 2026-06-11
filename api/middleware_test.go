@@ -58,6 +58,20 @@ func TestVerifyShopifyHMAC(t *testing.T) {
 	}
 }
 
+func TestRecover(t *testing.T) {
+	panicky := http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		panic("boom")
+	})
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rr := httptest.NewRecorder()
+
+	Recover(panicky).ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusInternalServerError {
+		t.Errorf("got %d, want %d", rr.Code, http.StatusInternalServerError)
+	}
+}
+
 func TestVerifyShopifyHMACUnreadableBody(t *testing.T) {
 	cfg := &config.Config{ShopifyWebhookSecret: hmacSecret}
 
