@@ -7,7 +7,7 @@ A Go HTTP service that receives Shopify `orders/create` webhook events, stores t
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose — runs the app and PostgreSQL; no local Go needed to run the service
 - [Go 1.26](https://go.dev/dl/) — required for local development (`make test`, `make fmt`, etc.)
 - [golangci-lint](https://golangci-lint.run/docs/welcome/install/local/) — required for `make lint` and the pre-commit hook; must be on your `$PATH` after installation
-- [lefthook](https://github.com/evilmartians/lefthook/tree/master#install) — git hooks manager; run `lefthook install` once after cloning
+- [lefthook](https://github.com/evilmartians/lefthook/tree/master#install) — git hooks manager; installed once via `make setup` after cloning
 - A Klaviyo account (see below)
 
 ## Klaviyo test account setup
@@ -37,12 +37,17 @@ KLAVIYO_API_KEY=pk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ## Local setup
 
 ```bash
-# 1. Copy env template and fill in your values (SHOPIFY_WEBHOOK_SECRET, KLAVIYO_API_KEY)
+# 1. One-time per clone: install the git hooks and commit-message template
+make setup
+
+# 2. Copy env template and fill in your values (SHOPIFY_WEBHOOK_SECRET, KLAVIYO_API_KEY)
 cp .env.example .env
 
-# 2. Build and start services (app + PostgreSQL)
+# 3. Build and start services (app + PostgreSQL)
 make up
 ```
+
+`make setup` runs `lefthook install` (pre-commit hooks) and points `commit.template` at `.gitmessage`, so `git commit` opens pre-filled with the message guidelines. Git can't apply a commit template automatically on clone, so each contributor runs this once.
 
 The app applies database migrations automatically on startup, so there is no separate migrate step. To reset the local database to a clean slate (the schema is re-applied on the next start):
 

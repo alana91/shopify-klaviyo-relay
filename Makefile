@@ -1,4 +1,4 @@
-.PHONY: fmt lint tidy check build test test-docker up db-reset seed-db send-webhook help
+.PHONY: setup fmt lint tidy check build test test-docker up db-reset seed-db send-webhook send-bad-webhook help
 
 ifneq (,$(wildcard .env))
 include .env
@@ -7,6 +7,10 @@ endif
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-16s %s\n", $$1, $$2}'
+
+setup: ## One-time dev setup: install git hooks and the commit template
+	git config commit.template .gitmessage
+	@command -v lefthook >/dev/null 2>&1 && lefthook install || echo "lefthook not on PATH — install it (https://lefthook.dev), then run 'lefthook install'"
 
 fmt: ## Format Go source files
 	go fmt ./...
