@@ -28,6 +28,7 @@ func TestHandleWebhookSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("store.New() error = %v", err)
 	}
+	defer func() { _ = s.Close() }()
 
 	req := httptest.NewRequest(http.MethodPost, "/webhook/shopify/orders", strings.NewReader(validWebhookBody))
 	rr := httptest.NewRecorder()
