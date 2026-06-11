@@ -1731,3 +1731,21 @@ I believe or readme could use more details. Add also the project structure in it
 
 commit the prompt log
 
+---
+
+## 2026-06-11T18:56:52Z
+
+the plan is more like the initial plan and is not completely corrrect. I want to keep it, but let's explain correctly what it is in the readme.
+
+---
+
+## 2026-06-11T18:58:51Z
+
+I'm not sure the file name @worker/worker.go makes sense
+
+---
+
+## 2026-06-11T19:00:17Z
+
+you can commit prompt log along
+
