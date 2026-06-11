@@ -36,7 +36,7 @@ db-reset: ## Drop and recreate the local dev database (schema re-applied on next
 	docker compose exec -T db psql -U $${DB_USER} -d postgres -c "CREATE DATABASE $${DB_NAME};"
 
 seed-db: ## Seed demo data into the DB container
-	docker-compose exec db psql -U $${DB_USER} $${DB_NAME} < store/seed.sql
+	docker compose exec -T db psql -U $${DB_USER} -d $${DB_NAME} < store/seed.sql
 
 send-webhook: ## Send a fake Shopify webhook to the local server
 	bash scripts/send_webhook.sh
