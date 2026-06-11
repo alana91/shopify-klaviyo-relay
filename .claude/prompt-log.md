@@ -1335,3 +1335,87 @@ yes
 
 let's actually commit the work so far first. then yes, client
 
+---
+
+## 2026-06-11T15:38:19Z
+
+ok
+
+---
+
+## 2026-06-11T15:40:55Z
+
+yes
+
+---
+
+## 2026-06-11T15:42:09Z
+
+run it
+
+---
+
+## 2026-06-11T15:45:43Z
+
+config first
+
+---
+
+## 2026-06-11T15:47:48Z
+
+run it
+
+---
+
+## 2026-06-11T15:49:12Z
+
+ah we should actually have that as a var not hardcoded. good catch.
+
+---
+
+## 2026-06-11T15:50:05Z
+
+run it
+
+---
+
+## 2026-06-11T15:52:43Z
+
+so here's a thought. maybe we should let it hit their API without the email and save the error and log the error instead of trying to figure this out ourselves. The reason is, we can't keep preparing for every little API change
+
+---
+
+## 2026-06-11T15:54:20Z
+
+yes
+
+---
+
+## 2026-06-11T15:57:07Z
+
+you still should seed throug Insert Event. It causes a dependency that doesn't have to exis
+
+---
+
+## 2026-06-11T16:00:16Z
+
+run it
+
+---
+
+## 2026-06-11T16:01:46Z
+
+yes
+
+---
+
+## 2026-06-11T16:03:37Z
+
+run it
+
+---
+
+## 2026-06-11T16:05:07Z
+
+write the Run test and pause. but before that let's run all tests and then commit the work so far
+

@@ -10,6 +10,8 @@ import (
 type Config struct {
 	DB                   DBConfig
 	ShopifyWebhookSecret string
+	KlaviyoAPIKey        string
+	KlaviyoBaseURL       string
 	Port                 string
 }
 
@@ -24,12 +26,28 @@ func Load() (Config, error) {
 		return Config{}, err
 	}
 
+	klaviyoAPIKey, err := requireEnv("KLAVIYO_API_KEY")
+	if err != nil {
+		return Config{}, err
+	}
+
+	klaviyoBaseURL := os.Getenv("KLAVIYO_BASE_URL")
+	if klaviyoBaseURL == "" {
+		klaviyoBaseURL = "https://a.klaviyo.com"
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	return Config{DB: db, ShopifyWebhookSecret: secret, Port: port}, nil
+	return Config{
+		DB:                   db,
+		ShopifyWebhookSecret: secret,
+		KlaviyoAPIKey:        klaviyoAPIKey,
+		KlaviyoBaseURL:       klaviyoBaseURL,
+		Port:                 port,
+	}, nil
 }
 
 type DBConfig struct {

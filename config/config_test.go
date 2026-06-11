@@ -26,11 +26,15 @@ func TestLoad(t *testing.T) {
 		t.Setenv("DB_USER", "relay")
 		t.Setenv("DB_PASSWORD", "secret")
 		t.Setenv("SHOPIFY_WEBHOOK_SECRET", "whsec_123")
+		t.Setenv("KLAVIYO_API_KEY", "pk_test_456")
+		t.Setenv("KLAVIYO_BASE_URL", "https://custom.example")
 		t.Setenv("PORT", "9090")
 
 		want := Config{
 			DB:                   DBConfig{Host: "localhost", Port: "5432", Name: "relay", User: "relay", Password: "secret"},
 			ShopifyWebhookSecret: "whsec_123",
+			KlaviyoAPIKey:        "pk_test_456",
+			KlaviyoBaseURL:       "https://custom.example",
 			Port:                 "9090",
 		}
 		got, err := Load()
@@ -50,6 +54,7 @@ func TestLoadDefaults(t *testing.T) {
 		t.Setenv("DB_USER", "relay")
 		t.Setenv("DB_PASSWORD", "secret")
 		t.Setenv("SHOPIFY_WEBHOOK_SECRET", "whsec_123")
+		t.Setenv("KLAVIYO_API_KEY", "pk_test_456")
 		t.Setenv("PORT", "")
 
 		got, err := Load()
@@ -58,6 +63,9 @@ func TestLoadDefaults(t *testing.T) {
 		}
 		if got.Port != "8080" {
 			t.Errorf("Port = %q, want %q", got.Port, "8080")
+		}
+		if got.KlaviyoBaseURL != "https://a.klaviyo.com" {
+			t.Errorf("KlaviyoBaseURL = %q, want %q", got.KlaviyoBaseURL, "https://a.klaviyo.com")
 		}
 	})
 }
