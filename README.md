@@ -2,6 +2,15 @@
 
 A Go HTTP service that receives Shopify `orders/create` webhook events, stores them in PostgreSQL, and forwards them to the Klaviyo Events API as "Placed Order" events.
 
+## How it works
+
+The service has two halves that share a PostgreSQL `webhook_events` table:
+
+1. **Ingestion (HTTP).** Shopify POSTs `orders/create` to `/webhook/shopify/orders`. Middleware verifies the `X-Shopify-Hmac-SHA256` signature, the handler parses the order and inserts a row with status `received`, then returns the new event id as JSON.
+2. **Forwarding (background worker).** A ticker periodically polls for `received` events, builds a Klaviyo "Placed Order" payload for each, POSTs it to the Klaviyo Events API, and marks the row `succeeded` or `failed`. Events older than `MAX_EVENT_AGE` are skipped.
+
+A small dashboard at `/` polls `GET /api/events` and lists recent events with their status, retry count, and last error.
+
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose — runs the app and PostgreSQL; no local Go needed to run the service
@@ -75,3 +84,56 @@ make test-docker # run tests in a container on the compose network
 ```
 
 Tests talk to a real PostgreSQL — each test provisions its own ephemeral database (created and dropped automatically) and applies migrations to it. `make test` reaches Postgres at `localhost`; `make test-docker` runs the suite inside the compose network.
+
+## Configuration
+
+All configuration comes from environment variables (loaded by `config.Load`); copy `.env.example` to `.env` and fill in the blanks. Required variables have no default — the service fails fast at startup if any are missing.
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `DB_HOST` | yes | — | Postgres host (`db` inside compose, `localhost` from the host) |
+| `DB_PORT` | no | `5432` | Postgres port |
+| `DB_NAME` | yes | — | Database name |
+| `DB_USER` | yes | — | Database user |
+| `DB_PASSWORD` | yes | — | Database password |
+| `PORT` | no | `8080` | HTTP listen port |
+| `SHOPIFY_WEBHOOK_SECRET` | yes | — | Secret used to verify the webhook HMAC signature |
+| `KLAVIYO_API_KEY` | yes | — | Klaviyo private API key |
+| `KLAVIYO_BASE_URL` | no | `https://a.klaviyo.com` | Klaviyo API base URL (override for tests/mocks) |
+| `WORKER_POLL_INTERVAL` | no | `5s` | How often the worker polls for pending events |
+| `MAX_EVENT_AGE` | no | `24h` | Events older than this are skipped by the worker |
+
+`.env.example` also lists `MAX_RETRIES`, `RETRY_INITIAL_INTERVAL`, and `RETRY_MULTIPLIER`. These are reserved for the upcoming retry/backoff work and are **not read yet**.
+
+## Project structure
+
+```
+.
+├── main.go                  # entrypoint: load config, run migrations, start the worker + HTTP server
+├── config/
+│   └── config.go            # env-driven configuration; composes the Postgres DSN
+├── api/                     # HTTP layer
+│   ├── middleware.go        # Shopify HMAC signature verification
+│   ├── handler.go           # webhook ingest, events JSON API, and dashboard handlers
+│   ├── order.go             # Shopify order parsing and persistence
+│   └── index.html           # dashboard, embedded via //go:embed; polls the events API
+├── store/                   # persistence layer — hand-written SQL over database/sql + pgx
+│   ├── store.go             # Store: InsertEvent, PendingEvents, Mark*, ListEvents, CountEvents
+│   ├── migrate.go           # embedded goose migrations, run automatically at startup
+│   ├── migrations/          # *.sql schema migrations
+│   └── seed.sql             # demo data for the dashboard (make seed-db)
+├── worker/                  # background forwarder
+│   ├── process.go           # Worker: poll loop (Run), processes pending events, marks succeeded/failed
+│   ├── worker.go            # builds the Klaviyo "Placed Order" payload from an event
+│   └── klaviyo.go           # Klaviyo Events API HTTP client
+├── internal/testdb/
+│   └── testdb.go            # test helper: ephemeral per-test Postgres + row seeding
+├── scripts/                 # send_webhook.sh / send_bad_webhook.sh — local webhook senders
+├── docker-compose.yml       # app + Postgres for local development
+├── Dockerfile
+├── Makefile                 # dev tasks (run `make help`)
+├── lefthook.yml             # pre-commit hooks (fmt, tidy, lint)
+└── plan.md                  # full spec, architecture, and vertical breakdown
+```
+
+Each top-level package owns one concern (`config`, `api`, `store`, `worker`), wired together in `main.go`. See `plan.md` for the full design and the vertical-by-vertical build plan.
