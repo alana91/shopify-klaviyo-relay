@@ -133,7 +133,9 @@ All configuration comes from environment variables (loaded by `config.Load`); co
 ├── Dockerfile
 ├── Makefile                 # dev tasks (run `make help`)
 ├── lefthook.yml             # pre-commit hooks (fmt, tidy, lint)
-└── plan.md                  # full spec, architecture, and vertical breakdown
+└── plan.md                  # original design plan (see note below); may differ from the current code
 ```
 
-Each top-level package owns one concern (`config`, `api`, `store`, `worker`), wired together in `main.go`. See `plan.md` for the full design and the vertical-by-vertical build plan.
+Each top-level package owns one concern (`config`, `api`, `store`, `worker`), wired together in `main.go`.
+
+`plan.md` is the **original design plan** — the upfront spec and the vertical-by-vertical build order the project started from. It is kept as a record of the intended design and is **not** maintained as live documentation: some details have since diverged from the implementation (e.g. it names `store/schema.sql` where the code uses `store/migrations/`, and places the worker poll loop in `worker/worker.go` where it now lives in `worker/process.go`). Treat this README and the code as the source of truth; read `plan.md` for the reasoning and overall shape.
