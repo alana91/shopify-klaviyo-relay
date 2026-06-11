@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   lint:
     name: Lint & format
@@ -31,6 +34,8 @@ jobs:
 
       - name: Lint
         uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
 
   test:
     name: Test
