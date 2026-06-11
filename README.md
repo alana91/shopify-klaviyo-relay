@@ -104,7 +104,15 @@ All configuration comes from environment variables (loaded by `config.Load`); co
 | `WORKER_POLL_INTERVAL` | no | `5s` | How often the worker polls for pending events |
 | `MAX_EVENT_AGE` | no | `24h` | Events older than this are skipped by the worker |
 
-`.env.example` also lists `MAX_RETRIES`, `RETRY_INITIAL_INTERVAL`, and `RETRY_MULTIPLIER`. These are reserved for the upcoming retry/backoff work and are **not read yet**.
+`.env.example` also lists `MAX_RETRIES`, `RETRY_INITIAL_INTERVAL`, and `RETRY_MULTIPLIER`. These are placeholders for the retry/backoff work described under [Future improvements](#future-improvements) and are **not read yet**.
+
+## Future improvements
+
+These are deliberately out of scope for now but are the natural next steps:
+
+- **Retry & backoff.** A failed Klaviyo forward currently lands in `failed` and is never retried. Add bounded retries with exponential backoff (driven by the reserved `MAX_RETRIES` / `RETRY_INITIAL_INTERVAL` / `RETRY_MULTIPLIER` vars), moving events through the already-defined `retrying` status and into a terminal `expired` status once they exceed `MAX_EVENT_AGE` or the retry ceiling.
+- **Auth on the dashboard and events API.** `/` and `/api/events` are unauthenticated — anyone who can reach the service can read every event's id, status, and last error. Gate them behind a token, basic auth, or a network ACL before exposing the service beyond a trusted network.
+- **Observability.** Export metrics (events processed, failures, queue depth, forward latency) and traces alongside the existing structured logs.
 
 ## Project structure
 
