@@ -1839,3 +1839,27 @@ what is the 1001 in the dockerfile?
 
 you can commit
 
+---
+
+## 2026-06-11T19:49:28Z
+
+ok. now, we're not going to do retry and backoff. that's too much. add to a session of future improvements or features in readme
+
+---
+
+## 2026-06-11T19:51:15Z
+
+ah I forgot graceful shutdown. let's do that right now instead
+
+---
+
+## 2026-06-11T19:54:45Z
+
+actually... on a server error we want to continue running the server I believe
+
+---
+
+## 2026-06-11T19:57:49Z
+
+yes. then let's handle what I was confused about. after being up, if a server error happens and it's not handled, that shouldn't call a crash
+
