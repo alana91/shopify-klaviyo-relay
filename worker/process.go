@@ -4,21 +4,42 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/alana91/shopify-klaviyo-relay/store"
 )
 
 type Worker struct {
-	store   *store.Store
-	klaviyo *KlaviyoClient
+	store       *store.Store
+	klaviyo     *KlaviyoClient
+	maxEventAge time.Duration
 }
 
-func NewWorker(s *store.Store, k *KlaviyoClient) *Worker {
-	return &Worker{store: s, klaviyo: k}
+func NewWorker(s *store.Store, k *KlaviyoClient, maxEventAge time.Duration) *Worker {
+	return &Worker{store: s, klaviyo: k, maxEventAge: maxEventAge}
+}
+
+func (w *Worker) Run(ctx context.Context, interval time.Duration) error {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	slog.Info("worker started", "poll_interval", interval.String())
+	for {
+		select {
+		case <-ctx.Done():
+			slog.Info("worker stopped")
+			return ctx.Err()
+		case <-ticker.C:
+			if err := w.processPending(ctx); err != nil {
+				slog.Error("processing pending events", "error", err)
+			}
+		}
+	}
 }
 
 func (w *Worker) processPending(ctx context.Context) error {
-	events, err := w.store.PendingEvents(ctx)
+	cutoff := time.Now().Add(-w.maxEventAge)
+	events, err := w.store.PendingEvents(ctx, cutoff)
 	if err != nil {
 		return fmt.Errorf("fetching pending events: %w", err)
 	}

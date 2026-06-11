@@ -53,7 +53,7 @@ func TestPendingEvents(t *testing.T) {
 		}
 		id := seedEvent(t, s, event, StatusReceived)
 
-		pending, err := s.PendingEvents(ctx)
+		pending, err := s.PendingEvents(ctx, time.Time{})
 		if err != nil {
 			t.Fatalf("PendingEvents() error = %v", err)
 		}
@@ -73,12 +73,51 @@ func TestPendingEventsEmpty(t *testing.T) {
 	ctx := context.Background()
 	s := newTestStore(t)
 
-	pending, err := s.PendingEvents(ctx)
+	pending, err := s.PendingEvents(ctx, time.Time{})
 	if err != nil {
 		t.Fatalf("PendingEvents() error = %v", err)
 	}
 	if len(pending) != 0 {
 		t.Fatalf("len(pending) = %d, want 0", len(pending))
+	}
+}
+
+func TestPendingEventsExcludesOld(t *testing.T) {
+	ctx := context.Background()
+	s := newTestStore(t)
+
+	base := time.Date(2026, 6, 11, 12, 0, 0, 0, time.UTC)
+	recent := Event{
+		ShopifyOrderID: 1,
+		OrderName:      "#recent",
+		CustomerEmail:  "jane@example.com",
+		TotalPrice:     "10.00",
+		Currency:       "USD",
+		LineItems:      []byte(`[]`),
+		OrderedAt:      base,
+	}
+	old := Event{
+		ShopifyOrderID: 2,
+		OrderName:      "#old",
+		CustomerEmail:  "jane@example.com",
+		TotalPrice:     "10.00",
+		Currency:       "USD",
+		LineItems:      []byte(`[]`),
+		OrderedAt:      base.Add(-48 * time.Hour),
+	}
+	recentID := seedEvent(t, s, recent, StatusReceived)
+	seedEvent(t, s, old, StatusReceived)
+
+	cutoff := base.Add(-24 * time.Hour)
+	pending, err := s.PendingEvents(ctx, cutoff)
+	if err != nil {
+		t.Fatalf("PendingEvents() error = %v", err)
+	}
+	if len(pending) != 1 {
+		t.Fatalf("len(pending) = %d, want 1", len(pending))
+	}
+	if pending[0].ID != recentID {
+		t.Errorf("ID = %q, want %q", pending[0].ID, recentID)
 	}
 }
 
@@ -99,7 +138,7 @@ func TestPendingEventsExcludesTerminalStatuses(t *testing.T) {
 	seedEvent(t, s, event, StatusFailed)
 	seedEvent(t, s, event, StatusExpired)
 
-	pending, err := s.PendingEvents(ctx)
+	pending, err := s.PendingEvents(ctx, time.Time{})
 	if err != nil {
 		t.Fatalf("PendingEvents() error = %v", err)
 	}

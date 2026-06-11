@@ -54,11 +54,11 @@ type PendingEvent struct {
 	Event
 }
 
-func (s *Store) PendingEvents(ctx context.Context) ([]PendingEvent, error) {
+func (s *Store) PendingEvents(ctx context.Context, cutoff time.Time) ([]PendingEvent, error) {
 	rows, err := s.db.QueryContext(ctx,
 		`SELECT id, shopify_order_id, order_name, customer_email, total_price, currency, line_items, ordered_at
 		   FROM webhook_events
-		  WHERE status = $1`, StatusReceived)
+		  WHERE status = $1 AND ordered_at >= $2`, StatusReceived, cutoff)
 	if err != nil {
 		return nil, fmt.Errorf("querying pending events: %w", err)
 	}

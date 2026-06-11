@@ -24,7 +24,7 @@ func TestProcessPendingSucceeds(t *testing.T) {
 	if err != nil {
 		t.Fatalf("store.New() error = %v", err)
 	}
-	t.Cleanup(func() { _ = s.Close() })
+	defer func() { _ = s.Close() }()
 
 	db := openDB(t, dsn)
 	id := seedReceived(t, db, store.Event{
@@ -34,7 +34,7 @@ func TestProcessPendingSucceeds(t *testing.T) {
 		TotalPrice:     "129.99",
 		Currency:       "USD",
 		LineItems:      []byte(`[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}]`),
-		OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
+		OrderedAt:      time.Now(),
 	})
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +42,7 @@ func TestProcessPendingSucceeds(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	wk := NewWorker(s, NewKlaviyoClient(srv.URL, "test-key"))
+	wk := NewWorker(s, NewKlaviyoClient(srv.URL, "test-key"), 24*time.Hour)
 	if err := wk.processPending(ctx); err != nil {
 		t.Fatalf("processPending() error = %v", err)
 	}
@@ -60,7 +60,7 @@ func TestProcessPendingFails(t *testing.T) {
 	if err != nil {
 		t.Fatalf("store.New() error = %v", err)
 	}
-	t.Cleanup(func() { _ = s.Close() })
+	defer func() { _ = s.Close() }()
 
 	db := openDB(t, dsn)
 	id := seedReceived(t, db, store.Event{
@@ -70,7 +70,7 @@ func TestProcessPendingFails(t *testing.T) {
 		TotalPrice:     "129.99",
 		Currency:       "USD",
 		LineItems:      []byte(`[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}]`),
-		OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
+		OrderedAt:      time.Now(),
 	})
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +79,7 @@ func TestProcessPendingFails(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	wk := NewWorker(s, NewKlaviyoClient(srv.URL, "test-key"))
+	wk := NewWorker(s, NewKlaviyoClient(srv.URL, "test-key"), 24*time.Hour)
 	if err := wk.processPending(ctx); err != nil {
 		t.Fatalf("processPending() error = %v", err)
 	}
@@ -89,6 +89,43 @@ func TestProcessPendingFails(t *testing.T) {
 	}
 	if got := readLastError(t, db, id); !strings.Contains(got, "400") {
 		t.Errorf("last_error = %q, want it to contain 400", got)
+	}
+}
+
+func TestProcessPendingSkipsOld(t *testing.T) {
+	ctx := context.Background()
+	dsn := testdb.New(t, store.Migrate)
+
+	s, err := store.New(ctx, dsn)
+	if err != nil {
+		t.Fatalf("store.New() error = %v", err)
+	}
+	defer func() { _ = s.Close() }()
+
+	db := openDB(t, dsn)
+	id := seedReceived(t, db, store.Event{
+		ShopifyOrderID: 5678901234,
+		OrderName:      "#1042",
+		CustomerEmail:  "jane@example.com",
+		TotalPrice:     "129.99",
+		Currency:       "USD",
+		LineItems:      []byte(`[]`),
+		OrderedAt:      time.Now().Add(-48 * time.Hour),
+	})
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Error("Klaviyo should not be called for an event older than max age")
+		w.WriteHeader(http.StatusAccepted)
+	}))
+	defer srv.Close()
+
+	wk := NewWorker(s, NewKlaviyoClient(srv.URL, "test-key"), 24*time.Hour)
+	if err := wk.processPending(ctx); err != nil {
+		t.Fatalf("processPending() error = %v", err)
+	}
+
+	if got := readStatus(t, db, id); got != string(store.StatusReceived) {
+		t.Errorf("status = %q, want %q (event should be left untouched)", got, store.StatusReceived)
 	}
 }
 

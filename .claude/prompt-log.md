@@ -1419,3 +1419,63 @@ run it
 
 write the Run test and pause. but before that let's run all tests and then commit the work so far
 
+---
+
+## 2026-06-11T16:09:32Z
+
+hmmm this is brittle. unless we can make it less brittle, let's remove it
+
+---
+
+## 2026-06-11T16:12:56Z
+
+this shouldn't be a constant but come from env WORKER_POLL_INTERVAL
+
+---
+
+## 2026-06-11T16:13:54Z
+
+run
+
+---
+
+## 2026-06-11T16:16:47Z
+
+we're missing some things. 1. If an event has age bigger than MAX_EVENT_AGE, we shouldn't process it. We should query events that happened in the last 24h only
+
+---
+
+## 2026-06-11T16:19:30Z
+
+run it
+
+---
+
+## 2026-06-11T16:23:30Z
+
+run it
+
+---
+
+## 2026-06-11T16:36:54Z
+
+shouldn't cleanup be a defer call?
+
+---
+
+## 2026-06-11T16:38:21Z
+
+I think we need to check this in other places too. But let's do it after we finish this step. Run the test.
+
+---
+
+## 2026-06-11T16:42:02Z
+
+1. add it 2. for now let's let it go. About your question, this isn't running anywhere and there are no real events, it's ok to leave it
+
+---
+
+## 2026-06-11T16:44:57Z
+
+good but don't fold in the defer cleanup unless it's same files. other files put in a separate commit
+

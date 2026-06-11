@@ -9,6 +9,7 @@ import (
 	"github.com/alana91/shopify-klaviyo-relay/api"
 	"github.com/alana91/shopify-klaviyo-relay/config"
 	"github.com/alana91/shopify-klaviyo-relay/store"
+	"github.com/alana91/shopify-klaviyo-relay/worker"
 )
 
 func main() {
@@ -38,6 +39,14 @@ func run() error {
 		return err
 	}
 	slog.Info("migrations applied")
+
+	klaviyo := worker.NewKlaviyoClient(cfg.KlaviyoBaseURL, cfg.KlaviyoAPIKey)
+	wk := worker.NewWorker(s, klaviyo, cfg.MaxEventAge)
+	go func() {
+		if err := wk.Run(ctx, cfg.WorkerPollInterval); err != nil {
+			slog.Info("worker exited", "reason", err)
+		}
+	}()
 
 	mux := http.NewServeMux()
 	mux.Handle("POST /webhook/shopify/orders", api.VerifyShopifyHMAC(&cfg, api.HandleWebhook(s)))

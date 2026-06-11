@@ -1,6 +1,9 @@
 package config
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestDBConfigDSN(t *testing.T) {
 	t.Run("composes a postgres url", func(t *testing.T) {
@@ -28,6 +31,8 @@ func TestLoad(t *testing.T) {
 		t.Setenv("SHOPIFY_WEBHOOK_SECRET", "whsec_123")
 		t.Setenv("KLAVIYO_API_KEY", "pk_test_456")
 		t.Setenv("KLAVIYO_BASE_URL", "https://custom.example")
+		t.Setenv("WORKER_POLL_INTERVAL", "10s")
+		t.Setenv("MAX_EVENT_AGE", "48h")
 		t.Setenv("PORT", "9090")
 
 		want := Config{
@@ -35,6 +40,8 @@ func TestLoad(t *testing.T) {
 			ShopifyWebhookSecret: "whsec_123",
 			KlaviyoAPIKey:        "pk_test_456",
 			KlaviyoBaseURL:       "https://custom.example",
+			WorkerPollInterval:   10 * time.Second,
+			MaxEventAge:          48 * time.Hour,
 			Port:                 "9090",
 		}
 		got, err := Load()
@@ -66,6 +73,12 @@ func TestLoadDefaults(t *testing.T) {
 		}
 		if got.KlaviyoBaseURL != "https://a.klaviyo.com" {
 			t.Errorf("KlaviyoBaseURL = %q, want %q", got.KlaviyoBaseURL, "https://a.klaviyo.com")
+		}
+		if got.WorkerPollInterval != 5*time.Second {
+			t.Errorf("WorkerPollInterval = %v, want %v", got.WorkerPollInterval, 5*time.Second)
+		}
+		if got.MaxEventAge != 24*time.Hour {
+			t.Errorf("MaxEventAge = %v, want %v", got.MaxEventAge, 24*time.Hour)
 		}
 	})
 }

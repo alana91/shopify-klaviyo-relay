@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"time"
 )
 
 type Config struct {
@@ -12,6 +13,8 @@ type Config struct {
 	ShopifyWebhookSecret string
 	KlaviyoAPIKey        string
 	KlaviyoBaseURL       string
+	WorkerPollInterval   time.Duration
+	MaxEventAge          time.Duration
 	Port                 string
 }
 
@@ -36,6 +39,16 @@ func Load() (Config, error) {
 		klaviyoBaseURL = "https://a.klaviyo.com"
 	}
 
+	pollInterval, err := durationEnv("WORKER_POLL_INTERVAL", 5*time.Second)
+	if err != nil {
+		return Config{}, err
+	}
+
+	maxEventAge, err := durationEnv("MAX_EVENT_AGE", 24*time.Hour)
+	if err != nil {
+		return Config{}, err
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -46,6 +59,8 @@ func Load() (Config, error) {
 		ShopifyWebhookSecret: secret,
 		KlaviyoAPIKey:        klaviyoAPIKey,
 		KlaviyoBaseURL:       klaviyoBaseURL,
+		WorkerPollInterval:   pollInterval,
+		MaxEventAge:          maxEventAge,
 		Port:                 port,
 	}, nil
 }
@@ -82,6 +97,18 @@ func LoadDB() (DBConfig, error) {
 	}
 
 	return DBConfig{Host: host, Port: port, Name: name, User: user, Password: password}, nil
+}
+
+func durationEnv(key string, fallback time.Duration) (time.Duration, error) {
+	v := os.Getenv(key)
+	if v == "" {
+		return fallback, nil
+	}
+	d, err := time.ParseDuration(v)
+	if err != nil {
+		return 0, fmt.Errorf("parsing %s %q: %w", key, v, err)
+	}
+	return d, nil
 }
 
 func requireEnv(key string) (string, error) {
