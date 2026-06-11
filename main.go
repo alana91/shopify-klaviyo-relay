@@ -1,22 +1,48 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log/slog"
 	"net/http"
 	"os"
+
+	"github.com/alana91/shopify-klaviyo-relay/api"
+	"github.com/alana91/shopify-klaviyo-relay/config"
+	"github.com/alana91/shopify-klaviyo-relay/store"
 )
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if _, err := fmt.Fprintln(w, "shopify-klaviyo-relay"); err != nil {
-			slog.Error("write response", "error", err)
-		}
-	})
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
 
-	slog.Info("listening", "addr", ":8080")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		slog.Error("server failed", "error", err)
+	if err := run(); err != nil {
+		slog.Error("startup failed", "error", err)
 		os.Exit(1)
 	}
+}
+
+func run() error {
+	ctx := context.Background()
+
+	cfg, err := config.Load()
+	if err != nil {
+		return err
+	}
+
+	s, err := store.New(ctx, cfg.DB.DSN())
+	if err != nil {
+		return err
+	}
+	defer func() { _ = s.Close() }()
+
+	if err := s.Migrate(ctx); err != nil {
+		return err
+	}
+	slog.Info("migrations applied")
+
+	mux := http.NewServeMux()
+	mux.Handle("POST /webhook/shopify/orders", api.VerifyShopifyHMAC(&cfg, api.HandleWebhook(s)))
+
+	addr := ":" + cfg.Port
+	slog.Info("listening", "addr", addr)
+	return http.ListenAndServe(addr, mux)
 }

@@ -13,6 +13,10 @@ import (
 //go:embed migrations/*.sql
 var migrationsFS embed.FS
 
+func (s *Store) Migrate(ctx context.Context) error {
+	return Migrate(ctx, s.db)
+}
+
 func Migrate(ctx context.Context, db *sql.DB) error {
 	sub, err := fs.Sub(migrationsFS, "migrations")
 	if err != nil {

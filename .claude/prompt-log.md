@@ -1179,3 +1179,15 @@ can you also removed the co authored by alana lines which don't make sense anymo
 
 let's commit the prompt log and then continue
 
+---
+
+## 2026-06-11T14:17:57Z
+
+add a test function only for testing defaults
+
+---
+
+## 2026-06-11T14:19:50Z
+
+yes. though not sure anything's left to implement. sadly this escaped the TDD cycle.
+
