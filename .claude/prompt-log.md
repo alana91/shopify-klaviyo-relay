@@ -1797,3 +1797,15 @@ literal (explicit is better)
 
 let's make an exception and first commit the prompt log this time. actually, let's make that the rule. if there's prompt log to commit, commit that first. then commit separate, yes
 
+---
+
+## 2026-06-11T19:26:01Z
+
+I feel like @worker/payload.go content should just be in @worker/klaviyo.go instead. similar to @api/order.go
+
+---
+
+## 2026-06-11T19:29:22Z
+
+commit it
+
