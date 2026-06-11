@@ -100,9 +100,9 @@ func TestPendingEventsExcludesTerminalStatuses(t *testing.T) {
 	ctx := context.Background()
 	s := newTestStore(t)
 
-	for _, status := range []Status{StatusSucceeded, StatusFailed, StatusExpired} {
+	for i, status := range []Status{StatusSucceeded, StatusFailed, StatusExpired} {
 		testdb.SeedEvent(t, s.db, testdb.Event{
-			ShopifyOrderID: 5678901234,
+			ShopifyOrderID: int64(i + 1),
 			OrderName:      "#1042",
 			CustomerEmail:  "jane@example.com",
 			OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
@@ -286,9 +286,9 @@ func TestCountEvents(t *testing.T) {
 	ctx := context.Background()
 	s := newTestStore(t)
 
-	for _, status := range []Status{StatusReceived, StatusSucceeded, StatusFailed} {
+	for i, status := range []Status{StatusReceived, StatusSucceeded, StatusFailed} {
 		testdb.SeedEvent(t, s.db, testdb.Event{
-			ShopifyOrderID: 1,
+			ShopifyOrderID: int64(i + 1),
 			OrderName:      "#1",
 			CustomerEmail:  "jane@example.com",
 			OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
@@ -337,4 +337,41 @@ func TestInsertEvent(t *testing.T) {
 			t.Errorf("status = %q, want %q", status, "received")
 		}
 	})
+}
+
+func TestInsertEventIsIdempotent(t *testing.T) {
+	ctx := context.Background()
+	s := newTestStore(t)
+
+	event := Event{
+		ShopifyOrderID: 5678901234,
+		OrderName:      "#1042",
+		CustomerEmail:  "jane@example.com",
+		TotalPrice:     "129.99",
+		Currency:       "USD",
+		LineItems:      []byte(`[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}]`),
+		OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
+	}
+
+	first, err := s.InsertEvent(ctx, event)
+	if err != nil {
+		t.Fatalf("first InsertEvent() error = %v", err)
+	}
+
+	second, err := s.InsertEvent(ctx, event)
+	if err != nil {
+		t.Fatalf("second InsertEvent() error = %v", err)
+	}
+
+	if second != first {
+		t.Errorf("second id = %q, want %q (same row)", second, first)
+	}
+
+	total, err := s.CountEvents(ctx)
+	if err != nil {
+		t.Fatalf("CountEvents() error = %v", err)
+	}
+	if total != 1 {
+		t.Errorf("row count = %d, want 1 (duplicate order should not create a new row)", total)
+	}
 }

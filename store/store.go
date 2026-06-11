@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -155,8 +156,19 @@ func (s *Store) InsertEvent(ctx context.Context, e Event) (string, error) {
 		`INSERT INTO webhook_events
 		    (shopify_order_id, order_name, customer_email, total_price, currency, line_items, ordered_at)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7)
+		 ON CONFLICT (shopify_order_id) DO NOTHING
 		 RETURNING id`,
 		e.ShopifyOrderID, e.OrderName, e.CustomerEmail, e.TotalPrice, e.Currency, e.LineItems, e.OrderedAt).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows) {
+		// Duplicate webhook: the order already exists (DO NOTHING returned no row),
+		// so look up and return the existing row's id.
+		if err := s.db.QueryRowContext(ctx,
+			`SELECT id FROM webhook_events WHERE shopify_order_id = $1`,
+			e.ShopifyOrderID).Scan(&id); err != nil {
+			return "", fmt.Errorf("looking up existing event: %w", err)
+		}
+		return id, nil
+	}
 	if err != nil {
 		return "", fmt.Errorf("inserting event: %w", err)
 	}
