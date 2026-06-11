@@ -1479,3 +1479,33 @@ I think we need to check this in other places too. But let's do it after we fini
 
 good but don't fold in the defer cleanup unless it's same files. other files put in a separate commit
 
+---
+
+## 2026-06-11T16:48:26Z
+
+the real key is in my env. I believe you can run a manual check against the real API because you can load the env into your shell without directly reading it, though I know that violates security
+
+---
+
+## 2026-06-11T16:50:04Z
+
+I'll run it, just give me the steps so we can go quickly
+
+---
+
+## 2026-06-11T16:52:56Z
+
+there are commands for all this in makefile. give me the make commands instead
+
+---
+
+## 2026-06-11T17:01:19Z
+
+create another script like send-webhook with an event we expect to fail right now (eg no email)
+
+---
+
+## 2026-06-11T17:04:54Z
+
+that worked as expected. awesome. yes, commit or new changes please
+

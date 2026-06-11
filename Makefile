@@ -40,3 +40,6 @@ seed-db: ## Seed demo data into the DB container
 
 send-webhook: ## Send a fake Shopify webhook to the local server
 	bash scripts/send_webhook.sh
+
+send-bad-webhook: ## Send a webhook with no email (expected to fail at Klaviyo)
+	bash scripts/send_bad_webhook.sh
