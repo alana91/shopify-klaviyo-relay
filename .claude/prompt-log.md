@@ -1215,3 +1215,123 @@ before we start vertical 2, I believe README and CLAUDE.md can be updated. Also,
 
 I believe the env template is not enough for the CI, as it doesn't have sample values for the required secrets. I'd rather provide env variable values to the CI instead of loading env template.
 
+---
+
+## 2026-06-11T14:44:50Z
+
+great. let's go. remember our minimal tdd cycles.
+
+---
+
+## 2026-06-11T14:50:32Z
+
+I increased the plan. Go on.
+
+---
+
+## 2026-06-11T14:53:31Z
+
+you forgot to pause before implementing for me to check the test. remember that next time. before continuing, we should investigate what is mandatory to send to klaviyo that we're relaying from shopify, if anything is
+
+---
+
+## 2026-06-11T14:56:51Z
+
+sounds good. store first please.
+
+---
+
+## 2026-06-11T15:09:42Z
+
+The test shouldn't use storage InsertEvent to seed data. We end up not isolating the function under test.
+
+---
+
+## 2026-06-11T15:13:10Z
+
+our plan should be the one in the current dir but I see you referencing another one
+
+---
+
+## 2026-06-11T15:13:39Z
+
+yes
+
+---
+
+## 2026-06-11T15:15:19Z
+
+ignore the retrying status for now. Also, I feel like we should get that "received" from an enum
+
+---
+
+## 2026-06-11T15:17:11Z
+
+make it a separate test function so it's easier to read. then run it
+
+---
+
+## 2026-06-11T15:18:02Z
+
+there were some more test cases, no?
+
+---
+
+## 2026-06-11T15:18:29Z
+
+yes
+
+---
+
+## 2026-06-11T15:18:56Z
+
+run it
+
+---
+
+## 2026-06-11T15:20:03Z
+
+there's no test for the error cases
+
+---
+
+## 2026-06-11T15:21:37Z
+
+I don't like it. let's just remove it.
+
+---
+
+## 2026-06-11T15:22:34Z
+
+yes
+
+---
+
+## 2026-06-11T15:23:27Z
+
+yes
+
+---
+
+## 2026-06-11T15:24:50Z
+
+first let's add logs for all errors (application code, not test) in the code added so far (not committed yet)
+
+---
+
+## 2026-06-11T15:27:02Z
+
+yes
+
+---
+
+## 2026-06-11T15:29:35Z
+
+yes
+
+---
+
+## 2026-06-11T15:31:39Z
+
+let's actually commit the work so far first. then yes, client
+

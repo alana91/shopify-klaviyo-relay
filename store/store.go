@@ -13,6 +13,17 @@ type Store struct {
 	db *sql.DB
 }
 
+// Status mirrors the event_status enum in the database schema.
+type Status string
+
+const (
+	StatusReceived  Status = "received"
+	StatusRetrying  Status = "retrying"
+	StatusSucceeded Status = "succeeded"
+	StatusFailed    Status = "failed"
+	StatusExpired   Status = "expired"
+)
+
 type Event struct {
 	ShopifyOrderID int64
 	OrderName      string
@@ -36,6 +47,60 @@ func New(ctx context.Context, dsn string) (*Store, error) {
 
 func (s *Store) Close() error {
 	return s.db.Close()
+}
+
+type PendingEvent struct {
+	ID string
+	Event
+}
+
+func (s *Store) PendingEvents(ctx context.Context) ([]PendingEvent, error) {
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT id, shopify_order_id, order_name, customer_email, total_price, currency, line_items, ordered_at
+		   FROM webhook_events
+		  WHERE status = $1`, StatusReceived)
+	if err != nil {
+		return nil, fmt.Errorf("querying pending events: %w", err)
+	}
+	defer rows.Close()
+
+	var pending []PendingEvent
+	for rows.Next() {
+		var p PendingEvent
+		if err := rows.Scan(&p.ID, &p.ShopifyOrderID, &p.OrderName, &p.CustomerEmail,
+			&p.TotalPrice, &p.Currency, &p.LineItems, &p.OrderedAt); err != nil {
+			return nil, fmt.Errorf("scanning pending event: %w", err)
+		}
+		pending = append(pending, p)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating pending events: %w", err)
+	}
+	return pending, nil
+}
+
+func (s *Store) MarkSucceeded(ctx context.Context, id string) error {
+	_, err := s.db.ExecContext(ctx,
+		`UPDATE webhook_events
+		    SET status = $1, last_attempted_at = NOW(), updated_at = NOW()
+		  WHERE id = $2`,
+		StatusSucceeded, id)
+	if err != nil {
+		return fmt.Errorf("marking event succeeded: %w", err)
+	}
+	return nil
+}
+
+func (s *Store) MarkFailed(ctx context.Context, id, errMsg string) error {
+	_, err := s.db.ExecContext(ctx,
+		`UPDATE webhook_events
+		    SET status = $1, last_attempted_at = NOW(), last_error = $2, updated_at = NOW()
+		  WHERE id = $3`,
+		StatusFailed, errMsg, id)
+	if err != nil {
+		return fmt.Errorf("marking event failed: %w", err)
+	}
+	return nil
 }
 
 func (s *Store) InsertEvent(ctx context.Context, e Event) (string, error) {
