@@ -26,6 +26,7 @@ type klaviyoAttributes struct {
 	Value      float64           `json:"value"`
 	Properties klaviyoProperties `json:"properties"`
 	Time       time.Time         `json:"time"`
+	UniqueID   string            `json:"unique_id"`
 }
 
 type klaviyoMetric struct {
@@ -74,6 +75,7 @@ func buildKlaviyoPayload(e store.Event) ([]byte, error) {
 		Currency:  e.Currency,
 	}
 	a.Time = e.OrderedAt
+	a.UniqueID = fmt.Sprintf("placed-order-%d", e.ShopifyOrderID)
 
 	return json.Marshal(p)
 }

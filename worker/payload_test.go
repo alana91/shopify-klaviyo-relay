@@ -18,7 +18,7 @@ func TestBuildKlaviyoPayload(t *testing.T) {
 		OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
 	}
 
-	want := `{"data":{"type":"event","attributes":{"metric":{"data":{"type":"metric","attributes":{"name":"Placed Order"}}},"profile":{"data":{"type":"profile","attributes":{"email":"jane@example.com"}}},"value":129.99,"properties":{"order_id":5678901234,"order_name":"#1042","line_items":[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}],"currency":"USD"},"time":"2026-06-11T07:00:00Z"}}}`
+	want := `{"data":{"type":"event","attributes":{"metric":{"data":{"type":"metric","attributes":{"name":"Placed Order"}}},"profile":{"data":{"type":"profile","attributes":{"email":"jane@example.com"}}},"value":129.99,"properties":{"order_id":5678901234,"order_name":"#1042","line_items":[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}],"currency":"USD"},"time":"2026-06-11T07:00:00Z","unique_id":"placed-order-5678901234"}}}`
 
 	got, err := buildKlaviyoPayload(e)
 	if err != nil {
