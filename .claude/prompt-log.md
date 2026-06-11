@@ -482,3 +482,45 @@ let's commit current changes
 
 I want to commit prompts, actually.
 
+---
+
+## 2026-06-11T10:49:14Z
+
+It's in the path, I believe it just may be the case that you don't set the path like me through ~/.zshrc
+
+---
+
+## 2026-06-11T10:50:05Z
+
+yes plese do
+
+---
+
+## 2026-06-11T10:50:20Z
+
+nevermind, undo that
+
+---
+
+## 2026-06-11T10:51:12Z
+
+what do you pick up the path from? any bash settings file? or nothing like that?
+
+---
+
+## 2026-06-11T10:54:17Z
+
+try again now
+
+---
+
+## 2026-06-11T10:55:09Z
+
+let's do the temp remove
+
+---
+
+## 2026-06-11T10:56:12Z
+
+ok, let's do it
+
