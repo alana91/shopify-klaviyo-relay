@@ -34,6 +34,10 @@ func New(ctx context.Context, dsn string) (*Store, error) {
 	return &Store{db: db}, nil
 }
 
+func (s *Store) Close() error {
+	return s.db.Close()
+}
+
 func (s *Store) InsertEvent(ctx context.Context, e Event) (string, error) {
 	var id string
 	err := s.db.QueryRowContext(ctx,

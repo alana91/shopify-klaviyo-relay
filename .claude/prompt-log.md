@@ -1107,3 +1107,57 @@ why use an image that is not our own? that makes testing a bit invalid
 
 we're actually at a point that we should commit some things
 
+---
+
+## 2026-06-11T13:44:29Z
+
+git log
+
+---
+
+## 2026-06-11T13:46:04Z
+
+ok good. we can continue. moving on, please pause after writing a test. I want to see it before we cotinue the TDD cycle
+
+---
+
+## 2026-06-11T13:49:24Z
+
+good. let's return a response with the id unless that would somehow break it for spotify (if it were real spotify)
+
+---
+
+## 2026-06-11T13:51:32Z
+
+it's just a bit... busy. any suggestion to organize it better or something?
+
+---
+
+## 2026-06-11T13:53:44Z
+
+much better. let's implement
+
+---
+
+## 2026-06-11T13:57:41Z
+
+we need to cover each case, yes. All errors should be covered
+
+---
+
+## 2026-06-11T14:00:59Z
+
+run it
+
+---
+
+## 2026-06-11T14:02:52Z
+
+let's do it. I think we also need to rplit the tests in different functions for this case. Others too, but so far this one. Also let's not reuse err reader. That's confusing.
+
+---
+
+## 2026-06-11T14:05:29Z
+
+let's commit to this point. You can commit prompt log together.
+
