@@ -7,6 +7,9 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/alana91/shopify-klaviyo-relay/store"
 )
 
 func TestKlaviyoSend(t *testing.T) {
@@ -60,5 +63,27 @@ func TestKlaviyoSendFailure(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "400") {
 		t.Errorf("error = %q, want it to contain status 400", err.Error())
+	}
+}
+
+func TestBuildKlaviyoPayload(t *testing.T) {
+	e := store.Event{
+		ShopifyOrderID: 5678901234,
+		OrderName:      "#1042",
+		CustomerEmail:  "jane@example.com",
+		TotalPrice:     "129.99",
+		Currency:       "USD",
+		LineItems:      []byte(`[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}]`),
+		OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
+	}
+
+	want := `{"data":{"type":"event","attributes":{"metric":{"data":{"type":"metric","attributes":{"name":"Placed Order"}}},"profile":{"data":{"type":"profile","attributes":{"email":"jane@example.com"}}},"value":129.99,"properties":{"order_id":5678901234,"order_name":"#1042","line_items":[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}],"currency":"USD"},"time":"2026-06-11T07:00:00Z","unique_id":"placed-order-5678901234"}}}`
+
+	got, err := buildKlaviyoPayload(e)
+	if err != nil {
+		t.Fatalf("buildKlaviyoPayload() error = %v", err)
+	}
+	if string(got) != want {
+		t.Errorf("buildKlaviyoPayload() =\n%s\nwant\n%s", got, want)
 	}
 }
