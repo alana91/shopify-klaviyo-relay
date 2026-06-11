@@ -96,6 +96,7 @@ All configuration comes from environment variables (loaded by `config.Load`); co
 | `DB_NAME` | yes | — | Database name |
 | `DB_USER` | yes | — | Database user |
 | `DB_PASSWORD` | yes | — | Database password |
+| `DB_SSLMODE` | no | `prefer` | Postgres `sslmode`; `prefer` uses TLS when available and falls back to plaintext (works against the stock local container). Use `require`/`verify-full` for remote DBs |
 | `PORT` | no | `8080` | HTTP listen port |
 | `SHOPIFY_WEBHOOK_SECRET` | yes | — | Secret used to verify the webhook HMAC signature |
 | `KLAVIYO_API_KEY` | yes | — | Klaviyo private API key |

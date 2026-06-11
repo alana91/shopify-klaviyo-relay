@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/alana91/shopify-klaviyo-relay/api"
 	"github.com/alana91/shopify-klaviyo-relay/config"
@@ -54,6 +55,14 @@ func run() error {
 	mux.Handle("GET /{$}", api.HandleIndex())
 
 	addr := ":" + cfg.Port
+	srv := &http.Server{
+		Addr:              addr,
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
 	slog.Info("listening", "addr", addr)
-	return http.ListenAndServe(addr, mux)
+	return srv.ListenAndServe()
 }

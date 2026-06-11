@@ -71,6 +71,7 @@ type DBConfig struct {
 	Name     string
 	User     string
 	Password string
+	SSLMode  string
 }
 
 func LoadDB() (DBConfig, error) {
@@ -96,7 +97,12 @@ func LoadDB() (DBConfig, error) {
 		port = "5432"
 	}
 
-	return DBConfig{Host: host, Port: port, Name: name, User: user, Password: password}, nil
+	sslMode := os.Getenv("DB_SSLMODE")
+	if sslMode == "" {
+		sslMode = "prefer"
+	}
+
+	return DBConfig{Host: host, Port: port, Name: name, User: user, Password: password, SSLMode: sslMode}, nil
 }
 
 func durationEnv(key string, fallback time.Duration) (time.Duration, error) {
@@ -125,7 +131,7 @@ func (c DBConfig) DSN() string {
 		User:     url.UserPassword(c.User, c.Password),
 		Host:     net.JoinHostPort(c.Host, c.Port),
 		Path:     "/" + c.Name,
-		RawQuery: "sslmode=disable",
+		RawQuery: "sslmode=" + c.SSLMode,
 	}
 	return u.String()
 }

@@ -13,6 +13,7 @@ func TestDBConfigDSN(t *testing.T) {
 			Name:     "relay",
 			User:     "relay",
 			Password: "secret",
+			SSLMode:  "disable",
 		}
 		want := "postgres://relay:secret@localhost:5432/relay?sslmode=disable"
 		if got := cfg.DSN(); got != want {
@@ -36,7 +37,7 @@ func TestLoad(t *testing.T) {
 		t.Setenv("PORT", "9090")
 
 		want := Config{
-			DB:                   DBConfig{Host: "localhost", Port: "5432", Name: "relay", User: "relay", Password: "secret"},
+			DB:                   DBConfig{Host: "localhost", Port: "5432", Name: "relay", User: "relay", Password: "secret", SSLMode: "prefer"},
 			ShopifyWebhookSecret: "whsec_123",
 			KlaviyoAPIKey:        "pk_test_456",
 			KlaviyoBaseURL:       "https://custom.example",
@@ -91,7 +92,7 @@ func TestLoadDB(t *testing.T) {
 		t.Setenv("DB_USER", "relay")
 		t.Setenv("DB_PASSWORD", "secret")
 
-		want := DBConfig{Host: "localhost", Port: "5433", Name: "relay", User: "relay", Password: "secret"}
+		want := DBConfig{Host: "localhost", Port: "5433", Name: "relay", User: "relay", Password: "secret", SSLMode: "prefer"}
 		got, err := LoadDB()
 		if err != nil {
 			t.Fatalf("LoadDB() error = %v", err)
