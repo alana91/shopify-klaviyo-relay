@@ -68,12 +68,13 @@ func TestStoreOrder(t *testing.T) {
 		if err != nil {
 			t.Fatalf("store.New() error = %v", err)
 		}
+		defer func() { _ = s.Close() }()
 
 		db, err := sql.Open("pgx", dsn)
 		if err != nil {
 			t.Fatalf("open read-back connection: %v", err)
 		}
-		t.Cleanup(func() { _ = db.Close() })
+		defer func() { _ = db.Close() }()
 
 		order := ShopifyOrder{
 			ID:         5678901234,
