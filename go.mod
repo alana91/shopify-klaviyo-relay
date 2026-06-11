@@ -1,4 +1,4 @@
-module github.com/hayeon/shopify-klaviyo-relay
+module github.com/alana91/shopify-klaviyo-relay
 
 go 1.26.4
 
