@@ -124,7 +124,7 @@ All configuration comes from environment variables (loaded by `config.Load`); co
 │   └── seed.sql             # demo data for the dashboard (make seed-db)
 ├── worker/                  # background forwarder
 │   ├── process.go           # Worker: poll loop (Run), processes pending events, marks succeeded/failed
-│   ├── worker.go            # builds the Klaviyo "Placed Order" payload from an event
+│   ├── payload.go           # builds the Klaviyo "Placed Order" payload from an event
 │   └── klaviyo.go           # Klaviyo Events API HTTP client
 ├── internal/testdb/
 │   └── testdb.go            # test helper: ephemeral per-test Postgres + row seeding
