@@ -1,4 +1,4 @@
-.PHONY: fmt lint tidy check build test test-docker generate up seed-db send-webhook help
+.PHONY: fmt lint tidy check build test test-docker generate up db-reset seed-db send-webhook help
 
 ifneq (,$(wildcard .env))
 include .env
@@ -6,7 +6,7 @@ export
 endif
 
 help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-16s %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-16s %s\n", $$1, $$2}'
 
 fmt: ## Format Go source files
 	go fmt ./...
@@ -33,6 +33,10 @@ generate: ## Run sqlc code generation
 
 up: ## Build and start docker-compose services
 	docker-compose up -d --build
+
+db-reset: ## Drop and recreate the local dev database (schema re-applied on next app start)
+	docker compose exec -T db psql -U $${DB_USER} -d postgres -c "DROP DATABASE IF EXISTS $${DB_NAME} WITH (FORCE);"
+	docker compose exec -T db psql -U $${DB_USER} -d postgres -c "CREATE DATABASE $${DB_NAME};"
 
 seed-db: ## Seed demo data into the DB container
 	docker-compose exec db psql -U $${DB_USER} $${DB_NAME} < store/seed.sql

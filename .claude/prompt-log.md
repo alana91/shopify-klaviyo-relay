@@ -1191,3 +1191,15 @@ add a test function only for testing defaults
 
 yes. though not sure anything's left to implement. sadly this escaped the TDD cycle.
 
+---
+
+## 2026-06-11T14:29:44Z
+
+we need some sort of command to clean up the local db that we get up
+
+---
+
+## 2026-06-11T14:32:27Z
+
+yes please
+
