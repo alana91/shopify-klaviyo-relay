@@ -50,6 +50,8 @@ func run() error {
 
 	mux := http.NewServeMux()
 	mux.Handle("POST /webhook/shopify/orders", api.VerifyShopifyHMAC(&cfg, api.HandleWebhook(s)))
+	mux.Handle("GET /api/events", api.HandleEvents(s))
+	mux.Handle("GET /{$}", api.HandleIndex())
 
 	addr := ":" + cfg.Port
 	slog.Info("listening", "addr", addr)

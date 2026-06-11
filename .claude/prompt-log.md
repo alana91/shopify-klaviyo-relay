@@ -1509,3 +1509,93 @@ create another script like send-webhook with an event we expect to fail right no
 
 that worked as expected. awesome. yes, commit or new changes please
 
+---
+
+## 2026-06-11T17:08:24Z
+
+co authored by Alana is back in our commits, I believe that doesn't make sense as I'm the author. please be careful not to keep doing this
+
+---
+
+## 2026-06-11T17:12:04Z
+
+I'll rewrite it myself. are we done we vertical 2?
+
+---
+
+## 2026-06-11T17:16:29Z
+
+you should refer to @plan.md instead
+
+---
+
+## 2026-06-11T17:18:11Z
+
+we can start. I'm wondering about the FE a bit. what was the pplan again
+
+---
+
+## 2026-06-11T17:20:34Z
+
+1. yes 2. trimmed. 3. build order is ok but I think we dont need a seed anymore
+
+---
+
+## 2026-06-11T17:22:48Z
+
+run it
+
+---
+
+## 2026-06-11T17:25:40Z
+
+ordering, then run it
+
+---
+
+## 2026-06-11T17:29:02Z
+
+1
+
+---
+
+## 2026-06-11T17:32:56Z
+
+run it
+
+---
+
+## 2026-06-11T17:34:11Z
+
+1. make it a separate test function
+
+---
+
+## 2026-06-11T17:34:50Z
+
+run it
+
+---
+
+## 2026-06-11T17:36:14Z
+
+1
+
+---
+
+## 2026-06-11T17:37:17Z
+
+run it
+
+---
+
+## 2026-06-11T17:39:55Z
+
+harden it
+
+---
+
+## 2026-06-11T17:45:30Z
+
+about the limit. we'll commit now and then we'll handle pagination in the FE and API after the commit
+

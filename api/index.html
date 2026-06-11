@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shopify → Klaviyo Relay</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1a1a1a; }
+    h1 { font-size: 1.25rem; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e5e5e5; }
+    th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #666; }
+    td.error { color: #b00020; font-family: ui-monospace, monospace; font-size: 0.85rem; }
+    .status { font-weight: 600; }
+    .status-succeeded { color: #1a7f37; }
+    .status-failed, .status-expired { color: #b00020; }
+    .status-retrying { color: #9a6700; }
+    .status-received { color: #0969da; }
+    .empty { color: #666; font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>Shopify → Klaviyo Relay</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Status</th>
+        <th>Retries</th>
+        <th>Last Error</th>
+        <th>Created At</th>
+      </tr>
+    </thead>
+    <tbody id="events"></tbody>
+  </table>
+
+  <script>
+    function cell(text, className) {
+      const td = document.createElement("td");
+      td.textContent = text;
+      if (className) td.className = className;
+      return td;
+    }
+
+    function row(e) {
+      const tr = document.createElement("tr");
+      tr.appendChild(cell(e.order_id));
+      tr.appendChild(cell(e.status, "status status-" + e.status));
+      tr.appendChild(cell(e.retry_count));
+      tr.appendChild(cell(e.last_error || "", "error"));
+      tr.appendChild(cell(new Date(e.created_at).toLocaleString()));
+      return tr;
+    }
+
+    function emptyRow() {
+      const tr = document.createElement("tr");
+      const td = cell("No events yet.", "empty");
+      td.colSpan = 5;
+      tr.appendChild(td);
+      return tr;
+    }
+
+    async function refresh() {
+      const res = await fetch("/api/events");
+      if (!res.ok) return;
+      const events = await res.json();
+      const tbody = document.getElementById("events");
+      if (events.length === 0) {
+        tbody.replaceChildren(emptyRow());
+      } else {
+        tbody.replaceChildren(...events.map(row));
+      }
+    }
+
+    refresh();
+    setInterval(refresh, 3000);
+  </script>
+</body>
+</html>

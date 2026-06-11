@@ -219,6 +219,86 @@ func TestMarkFailed(t *testing.T) {
 	}
 }
 
+func TestListEvents(t *testing.T) {
+	t.Run("returns a summary of a stored event", func(t *testing.T) {
+		ctx := context.Background()
+		s := newTestStore(t)
+
+		event := Event{
+			ShopifyOrderID: 5678901234,
+			OrderName:      "#1042",
+			CustomerEmail:  "jane@example.com",
+			TotalPrice:     "129.99",
+			Currency:       "USD",
+			LineItems:      []byte(`[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}]`),
+			OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
+		}
+		seedEvent(t, s, event, StatusReceived)
+
+		events, err := s.ListEvents(ctx)
+		if err != nil {
+			t.Fatalf("ListEvents() error = %v", err)
+		}
+		if len(events) != 1 {
+			t.Fatalf("len(events) = %d, want 1", len(events))
+		}
+
+		got := events[0]
+		if got.ShopifyOrderID != event.ShopifyOrderID {
+			t.Errorf("ShopifyOrderID = %d, want %d", got.ShopifyOrderID, event.ShopifyOrderID)
+		}
+		if got.Status != StatusReceived {
+			t.Errorf("Status = %q, want %q", got.Status, StatusReceived)
+		}
+		if got.RetryCount != 0 {
+			t.Errorf("RetryCount = %d, want 0", got.RetryCount)
+		}
+		if got.LastError != "" {
+			t.Errorf("LastError = %q, want \"\"", got.LastError)
+		}
+		if got.CreatedAt.IsZero() {
+			t.Error("CreatedAt is zero, want non-zero")
+		}
+	})
+}
+
+func TestListEventsOrdersNewestFirst(t *testing.T) {
+	ctx := context.Background()
+	s := newTestStore(t)
+
+	base := time.Date(2026, 6, 11, 12, 0, 0, 0, time.UTC)
+	insertAt := func(orderID int64, createdAt time.Time) {
+		t.Helper()
+		_, err := s.db.ExecContext(ctx,
+			`INSERT INTO webhook_events
+			    (shopify_order_id, order_name, customer_email, total_price, currency, line_items, ordered_at, created_at)
+			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+			orderID, "#x", "jane@example.com", "10.00", "USD", []byte(`[]`), base, createdAt)
+		if err != nil {
+			t.Fatalf("insert: %v", err)
+		}
+	}
+
+	insertAt(1, base.Add(-2*time.Hour))
+	insertAt(2, base)
+	insertAt(3, base.Add(-1*time.Hour))
+
+	events, err := s.ListEvents(ctx)
+	if err != nil {
+		t.Fatalf("ListEvents() error = %v", err)
+	}
+	if len(events) != 3 {
+		t.Fatalf("len(events) = %d, want 3", len(events))
+	}
+
+	want := []int64{2, 3, 1}
+	for i, w := range want {
+		if events[i].ShopifyOrderID != w {
+			t.Errorf("events[%d].ShopifyOrderID = %d, want %d", i, events[i].ShopifyOrderID, w)
+		}
+	}
+}
+
 func TestInsertEvent(t *testing.T) {
 	t.Run("stores a row with status received", func(t *testing.T) {
 		ctx := context.Background()

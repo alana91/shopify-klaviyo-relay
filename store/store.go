@@ -103,6 +103,43 @@ func (s *Store) MarkFailed(ctx context.Context, id, errMsg string) error {
 	return nil
 }
 
+type EventSummary struct {
+	ShopifyOrderID int64
+	Status         Status
+	RetryCount     int
+	LastError      string
+	CreatedAt      time.Time
+}
+
+func (s *Store) ListEvents(ctx context.Context) ([]EventSummary, error) {
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT shopify_order_id, status, retry_count, last_error, created_at
+		   FROM webhook_events
+		  ORDER BY created_at DESC
+		  LIMIT 100`)
+	if err != nil {
+		return nil, fmt.Errorf("querying events: %w", err)
+	}
+	defer rows.Close()
+
+	var events []EventSummary
+	for rows.Next() {
+		var (
+			e         EventSummary
+			lastError sql.NullString
+		)
+		if err := rows.Scan(&e.ShopifyOrderID, &e.Status, &e.RetryCount, &lastError, &e.CreatedAt); err != nil {
+			return nil, fmt.Errorf("scanning event: %w", err)
+		}
+		e.LastError = lastError.String
+		events = append(events, e)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating events: %w", err)
+	}
+	return events, nil
+}
+
 func (s *Store) InsertEvent(ctx context.Context, e Event) (string, error) {
 	var id string
 	err := s.db.QueryRowContext(ctx,
