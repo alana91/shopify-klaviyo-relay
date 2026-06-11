@@ -17,6 +17,10 @@
     .status-retrying { color: #9a6700; }
     .status-received { color: #0969da; }
     .empty { color: #666; font-style: italic; }
+    nav#pages { margin-top: 1rem; display: flex; gap: 0.25rem; flex-wrap: wrap; }
+    nav#pages button { padding: 0.25rem 0.6rem; border: 1px solid #d0d0d0; background: #fff; cursor: pointer; border-radius: 4px; }
+    nav#pages button[disabled] { cursor: default; opacity: 0.5; }
+    nav#pages button.current { background: #0969da; color: #fff; border-color: #0969da; }
   </style>
 </head>
 <body>
@@ -33,8 +37,12 @@
     </thead>
     <tbody id="events"></tbody>
   </table>
+  <nav id="pages"></nav>
 
   <script>
+    const PAGE_SIZE = 50;
+    let currentPage = 1;
+
     function cell(text, className) {
       const td = document.createElement("td");
       td.textContent = text;
@@ -60,16 +68,47 @@
       return tr;
     }
 
+    function pageButton(label, page, opts) {
+      opts = opts || {};
+      const b = document.createElement("button");
+      b.textContent = label;
+      if (opts.disabled) b.disabled = true;
+      if (opts.current) b.className = "current";
+      if (!opts.disabled && !opts.current) {
+        b.addEventListener("click", function () {
+          currentPage = page;
+          refresh();
+        });
+      }
+      return b;
+    }
+
+    function renderPages(total, limit) {
+      const nav = document.getElementById("pages");
+      const totalPages = Math.max(1, Math.ceil(total / limit));
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      const buttons = [pageButton("Prev", currentPage - 1, { disabled: currentPage <= 1 })];
+      for (let p = 1; p <= totalPages; p++) {
+        buttons.push(pageButton(String(p), p, { current: p === currentPage }));
+      }
+      buttons.push(pageButton("Next", currentPage + 1, { disabled: currentPage >= totalPages }));
+      nav.replaceChildren(...buttons);
+    }
+
     async function refresh() {
-      const res = await fetch("/api/events");
+      const res = await fetch("/api/events?page=" + currentPage + "&limit=" + PAGE_SIZE);
       if (!res.ok) return;
-      const events = await res.json();
+      const data = await res.json();
+
       const tbody = document.getElementById("events");
-      if (events.length === 0) {
+      if (data.events.length === 0) {
         tbody.replaceChildren(emptyRow());
       } else {
-        tbody.replaceChildren(...events.map(row));
+        tbody.replaceChildren(...data.events.map(row));
       }
+
+      renderPages(data.total, data.limit);
     }
 
     refresh();

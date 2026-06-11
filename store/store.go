@@ -111,12 +111,12 @@ type EventSummary struct {
 	CreatedAt      time.Time
 }
 
-func (s *Store) ListEvents(ctx context.Context) ([]EventSummary, error) {
+func (s *Store) ListEvents(ctx context.Context, limit, offset int) ([]EventSummary, error) {
 	rows, err := s.db.QueryContext(ctx,
 		`SELECT shopify_order_id, status, retry_count, last_error, created_at
 		   FROM webhook_events
 		  ORDER BY created_at DESC
-		  LIMIT 100`)
+		  LIMIT $1 OFFSET $2`, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("querying events: %w", err)
 	}
@@ -138,6 +138,15 @@ func (s *Store) ListEvents(ctx context.Context) ([]EventSummary, error) {
 		return nil, fmt.Errorf("iterating events: %w", err)
 	}
 	return events, nil
+}
+
+func (s *Store) CountEvents(ctx context.Context) (int, error) {
+	var total int
+	if err := s.db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM webhook_events`).Scan(&total); err != nil {
+		return 0, fmt.Errorf("counting events: %w", err)
+	}
+	return total, nil
 }
 
 func (s *Store) InsertEvent(ctx context.Context, e Event) (string, error) {

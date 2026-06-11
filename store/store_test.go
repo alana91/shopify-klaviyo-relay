@@ -235,7 +235,7 @@ func TestListEvents(t *testing.T) {
 		}
 		seedEvent(t, s, event, StatusReceived)
 
-		events, err := s.ListEvents(ctx)
+		events, err := s.ListEvents(ctx, 100, 0)
 		if err != nil {
 			t.Fatalf("ListEvents() error = %v", err)
 		}
@@ -283,7 +283,7 @@ func TestListEventsOrdersNewestFirst(t *testing.T) {
 	insertAt(2, base)
 	insertAt(3, base.Add(-1*time.Hour))
 
-	events, err := s.ListEvents(ctx)
+	events, err := s.ListEvents(ctx, 100, 0)
 	if err != nil {
 		t.Fatalf("ListEvents() error = %v", err)
 	}
@@ -296,6 +296,71 @@ func TestListEventsOrdersNewestFirst(t *testing.T) {
 		if events[i].ShopifyOrderID != w {
 			t.Errorf("events[%d].ShopifyOrderID = %d, want %d", i, events[i].ShopifyOrderID, w)
 		}
+	}
+}
+
+func TestListEventsPaginates(t *testing.T) {
+	ctx := context.Background()
+	s := newTestStore(t)
+
+	base := time.Date(2026, 6, 11, 12, 0, 0, 0, time.UTC)
+	insertAt := func(orderID int64, createdAt time.Time) {
+		t.Helper()
+		_, err := s.db.ExecContext(ctx,
+			`INSERT INTO webhook_events
+			    (shopify_order_id, order_name, customer_email, total_price, currency, line_items, ordered_at, created_at)
+			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+			orderID, "#x", "jane@example.com", "10.00", "USD", []byte(`[]`), base, createdAt)
+		if err != nil {
+			t.Fatalf("insert: %v", err)
+		}
+	}
+
+	// Newest-first order is 4, 3, 2, 1.
+	insertAt(1, base.Add(-3*time.Hour))
+	insertAt(2, base.Add(-2*time.Hour))
+	insertAt(3, base.Add(-1*time.Hour))
+	insertAt(4, base)
+
+	page, err := s.ListEvents(ctx, 2, 2)
+	if err != nil {
+		t.Fatalf("ListEvents() error = %v", err)
+	}
+
+	want := []int64{2, 1}
+	if len(page) != len(want) {
+		t.Fatalf("len(page) = %d, want %d", len(page), len(want))
+	}
+	for i, w := range want {
+		if page[i].ShopifyOrderID != w {
+			t.Errorf("page[%d].ShopifyOrderID = %d, want %d", i, page[i].ShopifyOrderID, w)
+		}
+	}
+}
+
+func TestCountEvents(t *testing.T) {
+	ctx := context.Background()
+	s := newTestStore(t)
+
+	event := Event{
+		ShopifyOrderID: 1,
+		OrderName:      "#1",
+		CustomerEmail:  "jane@example.com",
+		TotalPrice:     "10.00",
+		Currency:       "USD",
+		LineItems:      []byte(`[]`),
+		OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
+	}
+	seedEvent(t, s, event, StatusReceived)
+	seedEvent(t, s, event, StatusSucceeded)
+	seedEvent(t, s, event, StatusFailed)
+
+	total, err := s.CountEvents(ctx)
+	if err != nil {
+		t.Fatalf("CountEvents() error = %v", err)
+	}
+	if total != 3 {
+		t.Errorf("total = %d, want 3", total)
 	}
 }
 

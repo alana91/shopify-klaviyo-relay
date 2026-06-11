@@ -106,21 +106,35 @@ func TestHandleEvents(t *testing.T) {
 		t.Errorf("Content-Type = %q, want %q", ct, "application/json")
 	}
 
-	var got []struct {
-		OrderID    int64     `json:"order_id"`
-		Status     string    `json:"status"`
-		RetryCount int       `json:"retry_count"`
-		LastError  string    `json:"last_error"`
-		CreatedAt  time.Time `json:"created_at"`
+	var got struct {
+		Events []struct {
+			OrderID    int64     `json:"order_id"`
+			Status     string    `json:"status"`
+			RetryCount int       `json:"retry_count"`
+			LastError  string    `json:"last_error"`
+			CreatedAt  time.Time `json:"created_at"`
+		} `json:"events"`
+		Page  int `json:"page"`
+		Limit int `json:"limit"`
+		Total int `json:"total"`
 	}
 	if err := json.NewDecoder(rr.Body).Decode(&got); err != nil {
 		t.Fatalf("decode response: %v", err)
 	}
-	if len(got) != 1 {
-		t.Fatalf("len(events) = %d, want 1", len(got))
+	if got.Page != 1 {
+		t.Errorf("page = %d, want 1 (default)", got.Page)
+	}
+	if got.Limit != 50 {
+		t.Errorf("limit = %d, want 50 (default)", got.Limit)
+	}
+	if got.Total != 1 {
+		t.Errorf("total = %d, want 1", got.Total)
+	}
+	if len(got.Events) != 1 {
+		t.Fatalf("len(events) = %d, want 1", len(got.Events))
 	}
 
-	e := got[0]
+	e := got.Events[0]
 	if e.OrderID != 1002 {
 		t.Errorf("order_id = %d, want 1002", e.OrderID)
 	}
@@ -135,6 +149,119 @@ func TestHandleEvents(t *testing.T) {
 	}
 	if !e.CreatedAt.Equal(createdAt) {
 		t.Errorf("created_at = %v, want %v", e.CreatedAt, createdAt)
+	}
+}
+
+func TestHandleEventsPagination(t *testing.T) {
+	ctx := context.Background()
+	dsn := testdb.New(t, store.Migrate)
+
+	s, err := store.New(ctx, dsn)
+	if err != nil {
+		t.Fatalf("store.New() error = %v", err)
+	}
+	defer func() { _ = s.Close() }()
+
+	db, err := sql.Open("pgx", dsn)
+	if err != nil {
+		t.Fatalf("open seed connection: %v", err)
+	}
+	defer func() { _ = db.Close() }()
+
+	base := time.Date(2026, 6, 11, 12, 0, 0, 0, time.UTC)
+	// Newest-first order is 3, 2, 1.
+	for i, createdAt := range []time.Time{base.Add(-2 * time.Hour), base.Add(-1 * time.Hour), base} {
+		_, err := db.ExecContext(ctx,
+			`INSERT INTO webhook_events
+			    (shopify_order_id, order_name, customer_email, total_price, currency, line_items, ordered_at, created_at)
+			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+			int64(i+1), "#x", "jane@example.com", "10.00", "USD", []byte(`[]`), base, createdAt)
+		if err != nil {
+			t.Fatalf("seed event: %v", err)
+		}
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/api/events?page=2&limit=1", nil)
+	rr := httptest.NewRecorder()
+
+	HandleEvents(s).ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", rr.Code, http.StatusOK)
+	}
+
+	var got struct {
+		Events []struct {
+			OrderID int64 `json:"order_id"`
+		} `json:"events"`
+		Page  int `json:"page"`
+		Limit int `json:"limit"`
+		Total int `json:"total"`
+	}
+	if err := json.NewDecoder(rr.Body).Decode(&got); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+
+	if got.Page != 2 {
+		t.Errorf("page = %d, want 2", got.Page)
+	}
+	if got.Limit != 1 {
+		t.Errorf("limit = %d, want 1", got.Limit)
+	}
+	if got.Total != 3 {
+		t.Errorf("total = %d, want 3", got.Total)
+	}
+	if len(got.Events) != 1 {
+		t.Fatalf("len(events) = %d, want 1", len(got.Events))
+	}
+	if got.Events[0].OrderID != 2 {
+		t.Errorf("events[0].order_id = %d, want 2", got.Events[0].OrderID)
+	}
+}
+
+func TestHandleEventsClampsParams(t *testing.T) {
+	ctx := context.Background()
+	s, err := store.New(ctx, testdb.New(t, store.Migrate))
+	if err != nil {
+		t.Fatalf("store.New() error = %v", err)
+	}
+	defer func() { _ = s.Close() }()
+
+	tests := []struct {
+		name      string
+		query     string
+		wantPage  int
+		wantLimit int
+	}{
+		{"limit over max is capped", "?limit=10000", 1, 100},
+		{"page below one is clamped", "?page=0", 1, 50},
+		{"unparseable falls back to defaults", "?page=abc&limit=xyz", 1, 50},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/api/events"+tc.query, nil)
+			rr := httptest.NewRecorder()
+
+			HandleEvents(s).ServeHTTP(rr, req)
+
+			if rr.Code != http.StatusOK {
+				t.Fatalf("status = %d, want %d", rr.Code, http.StatusOK)
+			}
+
+			var got struct {
+				Page  int `json:"page"`
+				Limit int `json:"limit"`
+			}
+			if err := json.NewDecoder(rr.Body).Decode(&got); err != nil {
+				t.Fatalf("decode response: %v", err)
+			}
+			if got.Page != tc.wantPage {
+				t.Errorf("page = %d, want %d", got.Page, tc.wantPage)
+			}
+			if got.Limit != tc.wantLimit {
+				t.Errorf("limit = %d, want %d", got.Limit, tc.wantLimit)
+			}
+		})
 	}
 }
 
@@ -154,8 +281,18 @@ func TestHandleEventsEmpty(t *testing.T) {
 	if rr.Code != http.StatusOK {
 		t.Fatalf("status = %d, want %d", rr.Code, http.StatusOK)
 	}
-	if body := strings.TrimSpace(rr.Body.String()); body != "[]" {
-		t.Errorf("body = %q, want %q", body, "[]")
+	if body := rr.Body.String(); !strings.Contains(body, `"events":[]`) {
+		t.Errorf("body = %q, want events to be [] (not null)", body)
+	}
+
+	var got struct {
+		Total int `json:"total"`
+	}
+	if err := json.NewDecoder(rr.Body).Decode(&got); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if got.Total != 0 {
+		t.Errorf("total = %d, want 0", got.Total)
 	}
 }
 

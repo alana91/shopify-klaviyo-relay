@@ -1599,3 +1599,51 @@ harden it
 
 about the limit. we'll commit now and then we'll handle pagination in the FE and API after the commit
 
+---
+
+## 2026-06-11T17:48:24Z
+
+1. offset/limit 2. classic
+
+---
+
+## 2026-06-11T17:50:03Z
+
+run it
+
+---
+
+## 2026-06-11T17:57:49Z
+
+yes, write the CountEvents test
+
+---
+
+## 2026-06-11T17:58:17Z
+
+run it
+
+---
+
+## 2026-06-11T18:01:52Z
+
+run it
+
+---
+
+## 2026-06-11T18:08:07Z
+
+I did the browser check myself but let's do it again. I actually want to see it with 50+ results so create a seed script
+
+---
+
+## 2026-06-11T18:11:38Z
+
+I'm seeing all 60 instead of activating pagination
+
+---
+
+## 2026-06-11T18:14:01Z
+
+all good now. let's commit. separate
+
