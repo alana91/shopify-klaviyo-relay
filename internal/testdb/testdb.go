@@ -57,3 +57,57 @@ func New(t *testing.T, migrate func(context.Context, *sql.DB) error) string {
 
 	return dsn
 }
+
+// Event describes a webhook_events row to seed. Fields use primitive types so
+// this package stays free of a store import (store's own tests import testdb).
+// Zero values fall back to sensible defaults.
+type Event struct {
+	ShopifyOrderID int64
+	OrderName      string
+	CustomerEmail  string
+	TotalPrice     string // "" => "0"
+	Currency       string
+	LineItems      []byte // nil => []
+	OrderedAt      time.Time
+	Status         string // "" => received
+	RetryCount     int
+	LastError      string    // "" => NULL
+	CreatedAt      time.Time // zero => now
+}
+
+// SeedEvent inserts a row directly (not via store.InsertEvent) so tests stay
+// isolated from the ingestion code, and returns the new row's id.
+func SeedEvent(t *testing.T, db *sql.DB, e Event) string {
+	t.Helper()
+
+	if e.LineItems == nil {
+		e.LineItems = []byte("[]")
+	}
+	if e.TotalPrice == "" {
+		e.TotalPrice = "0"
+	}
+	if e.Status == "" {
+		e.Status = "received"
+	}
+	if e.CreatedAt.IsZero() {
+		e.CreatedAt = time.Now()
+	}
+	var lastError sql.NullString
+	if e.LastError != "" {
+		lastError = sql.NullString{String: e.LastError, Valid: true}
+	}
+
+	var id string
+	err := db.QueryRowContext(context.Background(),
+		`INSERT INTO webhook_events
+		    (shopify_order_id, order_name, customer_email, total_price, currency,
+		     line_items, ordered_at, status, retry_count, last_error, created_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		 RETURNING id`,
+		e.ShopifyOrderID, e.OrderName, e.CustomerEmail, e.TotalPrice, e.Currency,
+		e.LineItems, e.OrderedAt, e.Status, e.RetryCount, lastError, e.CreatedAt).Scan(&id)
+	if err != nil {
+		t.Fatalf("seed event: %v", err)
+	}
+	return id
+}

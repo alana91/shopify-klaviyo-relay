@@ -20,38 +20,21 @@ func newTestStore(t *testing.T) *Store {
 	return s
 }
 
-// seedEvent inserts a row directly (not via InsertEvent) so tests stay
-// isolated from the code under test, and returns the new row's id.
-func seedEvent(t *testing.T, s *Store, e Event, status Status) string {
-	t.Helper()
-	var id string
-	err := s.db.QueryRowContext(context.Background(),
-		`INSERT INTO webhook_events
-		    (shopify_order_id, order_name, customer_email, total_price, currency, line_items, ordered_at, status)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-		 RETURNING id`,
-		e.ShopifyOrderID, e.OrderName, e.CustomerEmail, e.TotalPrice, e.Currency, e.LineItems, e.OrderedAt, status).Scan(&id)
-	if err != nil {
-		t.Fatalf("seed event: %v", err)
-	}
-	return id
-}
-
 func TestPendingEvents(t *testing.T) {
 	t.Run("returns received events", func(t *testing.T) {
 		ctx := context.Background()
 		s := newTestStore(t)
 
-		event := Event{
+		const email = "jane@example.com"
+		id := testdb.SeedEvent(t, s.db, testdb.Event{
 			ShopifyOrderID: 5678901234,
 			OrderName:      "#1042",
-			CustomerEmail:  "jane@example.com",
+			CustomerEmail:  email,
 			TotalPrice:     "129.99",
 			Currency:       "USD",
 			LineItems:      []byte(`[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}]`),
 			OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
-		}
-		id := seedEvent(t, s, event, StatusReceived)
+		})
 
 		pending, err := s.PendingEvents(ctx, time.Time{})
 		if err != nil {
@@ -63,8 +46,8 @@ func TestPendingEvents(t *testing.T) {
 		if pending[0].ID != id {
 			t.Errorf("ID = %q, want %q", pending[0].ID, id)
 		}
-		if pending[0].CustomerEmail != event.CustomerEmail {
-			t.Errorf("CustomerEmail = %q, want %q", pending[0].CustomerEmail, event.CustomerEmail)
+		if pending[0].CustomerEmail != email {
+			t.Errorf("CustomerEmail = %q, want %q", pending[0].CustomerEmail, email)
 		}
 	})
 }
@@ -87,26 +70,18 @@ func TestPendingEventsExcludesOld(t *testing.T) {
 	s := newTestStore(t)
 
 	base := time.Date(2026, 6, 11, 12, 0, 0, 0, time.UTC)
-	recent := Event{
+	recentID := testdb.SeedEvent(t, s.db, testdb.Event{
 		ShopifyOrderID: 1,
 		OrderName:      "#recent",
 		CustomerEmail:  "jane@example.com",
-		TotalPrice:     "10.00",
-		Currency:       "USD",
-		LineItems:      []byte(`[]`),
 		OrderedAt:      base,
-	}
-	old := Event{
+	})
+	testdb.SeedEvent(t, s.db, testdb.Event{
 		ShopifyOrderID: 2,
 		OrderName:      "#old",
 		CustomerEmail:  "jane@example.com",
-		TotalPrice:     "10.00",
-		Currency:       "USD",
-		LineItems:      []byte(`[]`),
 		OrderedAt:      base.Add(-48 * time.Hour),
-	}
-	recentID := seedEvent(t, s, recent, StatusReceived)
-	seedEvent(t, s, old, StatusReceived)
+	})
 
 	cutoff := base.Add(-24 * time.Hour)
 	pending, err := s.PendingEvents(ctx, cutoff)
@@ -125,18 +100,15 @@ func TestPendingEventsExcludesTerminalStatuses(t *testing.T) {
 	ctx := context.Background()
 	s := newTestStore(t)
 
-	event := Event{
-		ShopifyOrderID: 5678901234,
-		OrderName:      "#1042",
-		CustomerEmail:  "jane@example.com",
-		TotalPrice:     "129.99",
-		Currency:       "USD",
-		LineItems:      []byte(`[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}]`),
-		OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
+	for _, status := range []Status{StatusSucceeded, StatusFailed, StatusExpired} {
+		testdb.SeedEvent(t, s.db, testdb.Event{
+			ShopifyOrderID: 5678901234,
+			OrderName:      "#1042",
+			CustomerEmail:  "jane@example.com",
+			OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
+			Status:         string(status),
+		})
 	}
-	seedEvent(t, s, event, StatusSucceeded)
-	seedEvent(t, s, event, StatusFailed)
-	seedEvent(t, s, event, StatusExpired)
 
 	pending, err := s.PendingEvents(ctx, time.Time{})
 	if err != nil {
@@ -151,16 +123,14 @@ func TestMarkSucceeded(t *testing.T) {
 	ctx := context.Background()
 	s := newTestStore(t)
 
-	event := Event{
+	id := testdb.SeedEvent(t, s.db, testdb.Event{
 		ShopifyOrderID: 5678901234,
 		OrderName:      "#1042",
 		CustomerEmail:  "jane@example.com",
 		TotalPrice:     "129.99",
 		Currency:       "USD",
-		LineItems:      []byte(`[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}]`),
 		OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
-	}
-	id := seedEvent(t, s, event, StatusReceived)
+	})
 
 	if err := s.MarkSucceeded(ctx, id); err != nil {
 		t.Fatalf("MarkSucceeded() error = %v", err)
@@ -185,16 +155,14 @@ func TestMarkFailed(t *testing.T) {
 	ctx := context.Background()
 	s := newTestStore(t)
 
-	event := Event{
+	id := testdb.SeedEvent(t, s.db, testdb.Event{
 		ShopifyOrderID: 5678901234,
 		OrderName:      "#1042",
 		CustomerEmail:  "jane@example.com",
 		TotalPrice:     "129.99",
 		Currency:       "USD",
-		LineItems:      []byte(`[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}]`),
 		OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
-	}
-	id := seedEvent(t, s, event, StatusReceived)
+	})
 
 	if err := s.MarkFailed(ctx, id, "klaviyo returned 400"); err != nil {
 		t.Fatalf("MarkFailed() error = %v", err)
@@ -224,16 +192,16 @@ func TestListEvents(t *testing.T) {
 		ctx := context.Background()
 		s := newTestStore(t)
 
-		event := Event{
-			ShopifyOrderID: 5678901234,
+		const orderID = int64(5678901234)
+		testdb.SeedEvent(t, s.db, testdb.Event{
+			ShopifyOrderID: orderID,
 			OrderName:      "#1042",
 			CustomerEmail:  "jane@example.com",
 			TotalPrice:     "129.99",
 			Currency:       "USD",
 			LineItems:      []byte(`[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}]`),
 			OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
-		}
-		seedEvent(t, s, event, StatusReceived)
+		})
 
 		events, err := s.ListEvents(ctx, 100, 0)
 		if err != nil {
@@ -244,8 +212,8 @@ func TestListEvents(t *testing.T) {
 		}
 
 		got := events[0]
-		if got.ShopifyOrderID != event.ShopifyOrderID {
-			t.Errorf("ShopifyOrderID = %d, want %d", got.ShopifyOrderID, event.ShopifyOrderID)
+		if got.ShopifyOrderID != orderID {
+			t.Errorf("ShopifyOrderID = %d, want %d", got.ShopifyOrderID, orderID)
 		}
 		if got.Status != StatusReceived {
 			t.Errorf("Status = %q, want %q", got.Status, StatusReceived)
@@ -267,21 +235,9 @@ func TestListEventsOrdersNewestFirst(t *testing.T) {
 	s := newTestStore(t)
 
 	base := time.Date(2026, 6, 11, 12, 0, 0, 0, time.UTC)
-	insertAt := func(orderID int64, createdAt time.Time) {
-		t.Helper()
-		_, err := s.db.ExecContext(ctx,
-			`INSERT INTO webhook_events
-			    (shopify_order_id, order_name, customer_email, total_price, currency, line_items, ordered_at, created_at)
-			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-			orderID, "#x", "jane@example.com", "10.00", "USD", []byte(`[]`), base, createdAt)
-		if err != nil {
-			t.Fatalf("insert: %v", err)
-		}
-	}
-
-	insertAt(1, base.Add(-2*time.Hour))
-	insertAt(2, base)
-	insertAt(3, base.Add(-1*time.Hour))
+	testdb.SeedEvent(t, s.db, testdb.Event{ShopifyOrderID: 1, CreatedAt: base.Add(-2 * time.Hour)})
+	testdb.SeedEvent(t, s.db, testdb.Event{ShopifyOrderID: 2, CreatedAt: base})
+	testdb.SeedEvent(t, s.db, testdb.Event{ShopifyOrderID: 3, CreatedAt: base.Add(-1 * time.Hour)})
 
 	events, err := s.ListEvents(ctx, 100, 0)
 	if err != nil {
@@ -304,23 +260,11 @@ func TestListEventsPaginates(t *testing.T) {
 	s := newTestStore(t)
 
 	base := time.Date(2026, 6, 11, 12, 0, 0, 0, time.UTC)
-	insertAt := func(orderID int64, createdAt time.Time) {
-		t.Helper()
-		_, err := s.db.ExecContext(ctx,
-			`INSERT INTO webhook_events
-			    (shopify_order_id, order_name, customer_email, total_price, currency, line_items, ordered_at, created_at)
-			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-			orderID, "#x", "jane@example.com", "10.00", "USD", []byte(`[]`), base, createdAt)
-		if err != nil {
-			t.Fatalf("insert: %v", err)
-		}
-	}
-
 	// Newest-first order is 4, 3, 2, 1.
-	insertAt(1, base.Add(-3*time.Hour))
-	insertAt(2, base.Add(-2*time.Hour))
-	insertAt(3, base.Add(-1*time.Hour))
-	insertAt(4, base)
+	testdb.SeedEvent(t, s.db, testdb.Event{ShopifyOrderID: 1, CreatedAt: base.Add(-3 * time.Hour)})
+	testdb.SeedEvent(t, s.db, testdb.Event{ShopifyOrderID: 2, CreatedAt: base.Add(-2 * time.Hour)})
+	testdb.SeedEvent(t, s.db, testdb.Event{ShopifyOrderID: 3, CreatedAt: base.Add(-1 * time.Hour)})
+	testdb.SeedEvent(t, s.db, testdb.Event{ShopifyOrderID: 4, CreatedAt: base})
 
 	page, err := s.ListEvents(ctx, 2, 2)
 	if err != nil {
@@ -342,18 +286,15 @@ func TestCountEvents(t *testing.T) {
 	ctx := context.Background()
 	s := newTestStore(t)
 
-	event := Event{
-		ShopifyOrderID: 1,
-		OrderName:      "#1",
-		CustomerEmail:  "jane@example.com",
-		TotalPrice:     "10.00",
-		Currency:       "USD",
-		LineItems:      []byte(`[]`),
-		OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
+	for _, status := range []Status{StatusReceived, StatusSucceeded, StatusFailed} {
+		testdb.SeedEvent(t, s.db, testdb.Event{
+			ShopifyOrderID: 1,
+			OrderName:      "#1",
+			CustomerEmail:  "jane@example.com",
+			OrderedAt:      time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
+			Status:         string(status),
+		})
 	}
-	seedEvent(t, s, event, StatusReceived)
-	seedEvent(t, s, event, StatusSucceeded)
-	seedEvent(t, s, event, StatusFailed)
 
 	total, err := s.CountEvents(ctx)
 	if err != nil {

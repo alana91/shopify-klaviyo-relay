@@ -84,15 +84,18 @@ func TestHandleEvents(t *testing.T) {
 	defer func() { _ = db.Close() }()
 
 	createdAt := time.Date(2026, 6, 11, 12, 0, 0, 0, time.UTC)
-	_, err = db.ExecContext(ctx,
-		`INSERT INTO webhook_events
-		    (shopify_order_id, order_name, customer_email, total_price, currency, line_items, ordered_at, status, retry_count, last_error, created_at)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-		int64(1002), "#1002", "bob@example.com", "149.00", "USD", []byte(`[]`),
-		createdAt, store.StatusFailed, 3, "klaviyo returned 400", createdAt)
-	if err != nil {
-		t.Fatalf("seed event: %v", err)
-	}
+	testdb.SeedEvent(t, db, testdb.Event{
+		ShopifyOrderID: 1002,
+		OrderName:      "#1002",
+		CustomerEmail:  "bob@example.com",
+		TotalPrice:     "149.00",
+		Currency:       "USD",
+		OrderedAt:      createdAt,
+		Status:         string(store.StatusFailed),
+		RetryCount:     3,
+		LastError:      "klaviyo returned 400",
+		CreatedAt:      createdAt,
+	})
 
 	req := httptest.NewRequest(http.MethodGet, "/api/events", nil)
 	rr := httptest.NewRecorder()
@@ -171,14 +174,15 @@ func TestHandleEventsPagination(t *testing.T) {
 	base := time.Date(2026, 6, 11, 12, 0, 0, 0, time.UTC)
 	// Newest-first order is 3, 2, 1.
 	for i, createdAt := range []time.Time{base.Add(-2 * time.Hour), base.Add(-1 * time.Hour), base} {
-		_, err := db.ExecContext(ctx,
-			`INSERT INTO webhook_events
-			    (shopify_order_id, order_name, customer_email, total_price, currency, line_items, ordered_at, created_at)
-			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-			int64(i+1), "#x", "jane@example.com", "10.00", "USD", []byte(`[]`), base, createdAt)
-		if err != nil {
-			t.Fatalf("seed event: %v", err)
-		}
+		testdb.SeedEvent(t, db, testdb.Event{
+			ShopifyOrderID: int64(i + 1),
+			OrderName:      "#x",
+			CustomerEmail:  "jane@example.com",
+			TotalPrice:     "10.00",
+			Currency:       "USD",
+			OrderedAt:      base,
+			CreatedAt:      createdAt,
+		})
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "/api/events?page=2&limit=1", nil)

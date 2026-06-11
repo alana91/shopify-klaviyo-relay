@@ -25,37 +25,27 @@ type errReader struct{}
 
 func (errReader) Read([]byte) (int, error) { return 0, errors.New("read failed") }
 
-func TestVerifyShopifyHMAC(t *testing.T) {
-	const secret = "test-secret"
-	const body = `{"id":1,"name":"#1001"}`
+const (
+	hmacSecret = "test-secret"
+	hmacBody   = `{"id":1,"name":"#1001"}`
+)
 
-	cfg := &config.Config{ShopifyWebhookSecret: secret}
+func TestVerifyShopifyHMAC(t *testing.T) {
+	cfg := &config.Config{ShopifyWebhookSecret: hmacSecret}
 
 	tests := []struct {
 		name     string
 		sig      string
 		wantCode int
 	}{
-		{
-			name:     "valid signature passes",
-			sig:      sign(secret, body),
-			wantCode: http.StatusOK,
-		},
-		{
-			name:     "missing header returns 401",
-			sig:      "",
-			wantCode: http.StatusUnauthorized,
-		},
-		{
-			name:     "invalid signature returns 401",
-			sig:      sign("wrong-secret", body),
-			wantCode: http.StatusUnauthorized,
-		},
+		{"valid signature passes", sign(hmacSecret, hmacBody), http.StatusOK},
+		{"missing header returns 401", "", http.StatusUnauthorized},
+		{"invalid signature returns 401", sign("wrong-secret", hmacBody), http.StatusUnauthorized},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
+			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(hmacBody))
 			req.Header.Set("X-Shopify-Hmac-SHA256", tc.sig)
 			rr := httptest.NewRecorder()
 
@@ -66,16 +56,18 @@ func TestVerifyShopifyHMAC(t *testing.T) {
 			}
 		})
 	}
+}
 
-	t.Run("unreadable body returns 400", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodPost, "/", errReader{})
-		req.Header.Set("X-Shopify-Hmac-SHA256", sign(secret, body))
-		rr := httptest.NewRecorder()
+func TestVerifyShopifyHMACUnreadableBody(t *testing.T) {
+	cfg := &config.Config{ShopifyWebhookSecret: hmacSecret}
 
-		VerifyShopifyHMAC(cfg, http.HandlerFunc(okHandler)).ServeHTTP(rr, req)
+	req := httptest.NewRequest(http.MethodPost, "/", errReader{})
+	req.Header.Set("X-Shopify-Hmac-SHA256", sign(hmacSecret, hmacBody))
+	rr := httptest.NewRecorder()
 
-		if rr.Code != http.StatusBadRequest {
-			t.Errorf("got %d, want %d", rr.Code, http.StatusBadRequest)
-		}
-	})
+	VerifyShopifyHMAC(cfg, http.HandlerFunc(okHandler)).ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusBadRequest {
+		t.Errorf("got %d, want %d", rr.Code, http.StatusBadRequest)
+	}
 }

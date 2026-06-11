@@ -14,49 +14,47 @@ import (
 )
 
 func TestParseShopifyOrder(t *testing.T) {
-	t.Run("valid payload parses fields", func(t *testing.T) {
-		payload := []byte(`{"id":5678901234,"name":"#1042","email":"jane@example.com","total_price":"129.99","currency":"USD","created_at":"2026-06-11T07:00:00Z","line_items":[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}]}`)
+	payload := []byte(`{"id":5678901234,"name":"#1042","email":"jane@example.com","total_price":"129.99","currency":"USD","created_at":"2026-06-11T07:00:00Z","line_items":[{"title":"Wireless Headphones","quantity":1,"price":"129.99"}]}`)
 
-		want := ShopifyOrder{
-			ID:         5678901234,
-			Name:       "#1042",
-			Email:      "jane@example.com",
-			TotalPrice: "129.99",
-			Currency:   "USD",
-			CreatedAt:  time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
-			LineItems:  []LineItem{{Title: "Wireless Headphones", Quantity: 1, Price: "129.99"}},
-		}
+	want := ShopifyOrder{
+		ID:         5678901234,
+		Name:       "#1042",
+		Email:      "jane@example.com",
+		TotalPrice: "129.99",
+		Currency:   "USD",
+		CreatedAt:  time.Date(2026, 6, 11, 7, 0, 0, 0, time.UTC),
+		LineItems:  []LineItem{{Title: "Wireless Headphones", Quantity: 1, Price: "129.99"}},
+	}
 
-		got, err := parseShopifyOrder(payload)
-		if err != nil {
-			t.Fatalf("parseShopifyOrder() error = %v", err)
-		}
+	got, err := parseShopifyOrder(payload)
+	if err != nil {
+		t.Fatalf("parseShopifyOrder() error = %v", err)
+	}
 
-		checks := []struct {
-			field     string
-			equal     bool
-			got, want any
-		}{
-			{"ID", got.ID == want.ID, got.ID, want.ID},
-			{"Name", got.Name == want.Name, got.Name, want.Name},
-			{"Email", got.Email == want.Email, got.Email, want.Email},
-			{"TotalPrice", got.TotalPrice == want.TotalPrice, got.TotalPrice, want.TotalPrice},
-			{"Currency", got.Currency == want.Currency, got.Currency, want.Currency},
-			{"CreatedAt", got.CreatedAt.Equal(want.CreatedAt), got.CreatedAt, want.CreatedAt},
-			{"LineItems", slices.Equal(got.LineItems, want.LineItems), got.LineItems, want.LineItems},
+	checks := []struct {
+		field     string
+		equal     bool
+		got, want any
+	}{
+		{"ID", got.ID == want.ID, got.ID, want.ID},
+		{"Name", got.Name == want.Name, got.Name, want.Name},
+		{"Email", got.Email == want.Email, got.Email, want.Email},
+		{"TotalPrice", got.TotalPrice == want.TotalPrice, got.TotalPrice, want.TotalPrice},
+		{"Currency", got.Currency == want.Currency, got.Currency, want.Currency},
+		{"CreatedAt", got.CreatedAt.Equal(want.CreatedAt), got.CreatedAt, want.CreatedAt},
+		{"LineItems", slices.Equal(got.LineItems, want.LineItems), got.LineItems, want.LineItems},
+	}
+	for _, c := range checks {
+		if !c.equal {
+			t.Errorf("%s = %v, want %v", c.field, c.got, c.want)
 		}
-		for _, c := range checks {
-			if !c.equal {
-				t.Errorf("%s = %v, want %v", c.field, c.got, c.want)
-			}
-		}
-	})
+	}
+}
 
-	t.Run("invalid JSON returns error", func(t *testing.T) {
-		if _, err := parseShopifyOrder([]byte(`{not valid json`)); err == nil {
-			t.Error("parseShopifyOrder() error = nil, want error")
-		}
-	})
+func TestParseShopifyOrderInvalidJSON(t *testing.T) {
+	if _, err := parseShopifyOrder([]byte(`{not valid json`)); err == nil {
+		t.Error("parseShopifyOrder() error = nil, want error")
+	}
 }
 
 func TestStoreOrder(t *testing.T) {

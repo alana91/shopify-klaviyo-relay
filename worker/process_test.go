@@ -27,7 +27,7 @@ func TestProcessPendingSucceeds(t *testing.T) {
 	defer func() { _ = s.Close() }()
 
 	db := openDB(t, dsn)
-	id := seedReceived(t, db, store.Event{
+	id := testdb.SeedEvent(t, db, testdb.Event{
 		ShopifyOrderID: 5678901234,
 		OrderName:      "#1042",
 		CustomerEmail:  "jane@example.com",
@@ -63,7 +63,7 @@ func TestProcessPendingFails(t *testing.T) {
 	defer func() { _ = s.Close() }()
 
 	db := openDB(t, dsn)
-	id := seedReceived(t, db, store.Event{
+	id := testdb.SeedEvent(t, db, testdb.Event{
 		ShopifyOrderID: 5678901234,
 		OrderName:      "#1042",
 		CustomerEmail:  "jane@example.com",
@@ -103,13 +103,12 @@ func TestProcessPendingSkipsOld(t *testing.T) {
 	defer func() { _ = s.Close() }()
 
 	db := openDB(t, dsn)
-	id := seedReceived(t, db, store.Event{
+	id := testdb.SeedEvent(t, db, testdb.Event{
 		ShopifyOrderID: 5678901234,
 		OrderName:      "#1042",
 		CustomerEmail:  "jane@example.com",
 		TotalPrice:     "129.99",
 		Currency:       "USD",
-		LineItems:      []byte(`[]`),
 		OrderedAt:      time.Now().Add(-48 * time.Hour),
 	})
 
@@ -137,23 +136,6 @@ func openDB(t *testing.T, dsn string) *sql.DB {
 	}
 	t.Cleanup(func() { _ = db.Close() })
 	return db
-}
-
-// seedReceived inserts a row directly (not via store.InsertEvent) so the
-// worker test stays independent of the ingestion path, and returns its id.
-func seedReceived(t *testing.T, db *sql.DB, e store.Event) string {
-	t.Helper()
-	var id string
-	err := db.QueryRowContext(context.Background(),
-		`INSERT INTO webhook_events
-		    (shopify_order_id, order_name, customer_email, total_price, currency, line_items, ordered_at, status)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, 'received')
-		 RETURNING id`,
-		e.ShopifyOrderID, e.OrderName, e.CustomerEmail, e.TotalPrice, e.Currency, e.LineItems, e.OrderedAt).Scan(&id)
-	if err != nil {
-		t.Fatalf("seed received: %v", err)
-	}
-	return id
 }
 
 func readStatus(t *testing.T, db *sql.DB, id string) string {

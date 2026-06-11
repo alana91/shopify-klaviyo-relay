@@ -35,6 +35,7 @@ Use `t.Run()` table-driven tests built incrementally. Always run with `-race`.
 - `internal/testdb.New` provisions a fresh, uniquely-named database per test, applies migrations, and drops it on cleanup
 - `make test` runs locally (Postgres at `localhost`); `make test-docker` runs in our own image on the compose network
 - Compare values with `==` / `slices.Equal` / `time.Time.Equal` — **no `reflect.DeepEqual`**
+- Test organization: variations of the *same* scenario stay in one function as a `t.Run()` table. When a case is materially different from its siblings (different setup, inputs, or what's being asserted), give it its own top-level `TestXxx` function instead of a sibling `t.Run` block
 
 ## Commit Messages
 
