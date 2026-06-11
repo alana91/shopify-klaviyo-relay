@@ -1209,3 +1209,9 @@ yes please
 
 before we start vertical 2, I believe README and CLAUDE.md can be updated. Also, it's possible CI is broken now because of DB tests.
 
+---
+
+## 2026-06-11T14:40:04Z
+
+I believe the env template is not enough for the CI, as it doesn't have sample values for the required secrets. I'd rather provide env variable values to the CI instead of loading env template.
+

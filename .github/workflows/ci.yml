@@ -41,11 +41,12 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    env:
+      DB_NAME: relay
+      DB_USER: relay
+      DB_PASSWORD: relay
     steps:
       - uses: actions/checkout@v4
-
-      - name: Prepare env
-        run: cp .env.example .env
 
       - name: Run tests
         run: make test-docker
