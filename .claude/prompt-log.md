@@ -1647,3 +1647,39 @@ I'm seeing all 60 instead of activating pagination
 
 all good now. let's commit. separate
 
+---
+
+## 2026-06-11T18:18:13Z
+
+let's polish tests a bit. review test files, if a function is testing more than one case, split into a different function
+
+---
+
+## 2026-06-11T18:20:53Z
+
+when it's test tables, we can keep it. I meant when cases are so different it's another run. that's hard to read and understand. tables are fine.
+
+---
+
+## 2026-06-11T18:24:18Z
+
+let's add this rule of how to organize them to memory and claude.md
+
+---
+
+## 2026-06-11T18:26:36Z
+
+now another polishing. there's a bunch of places we seed in tests using very similar functions. I believe this can be unified
+
+---
+
+## 2026-06-11T18:38:11Z
+
+let's commit it together
+
+---
+
+## 2026-06-11T18:39:10Z
+
+commit the prompt  now too
+
