@@ -2,9 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 	"time"
 
 	"github.com/alana91/shopify-klaviyo-relay/api"
@@ -12,6 +16,8 @@ import (
 	"github.com/alana91/shopify-klaviyo-relay/store"
 	"github.com/alana91/shopify-klaviyo-relay/worker"
 )
+
+const shutdownTimeout = 10 * time.Second
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
@@ -23,7 +29,8 @@ func main() {
 }
 
 func run() error {
-	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	cfg, err := config.Load()
 	if err != nil {
@@ -43,7 +50,10 @@ func run() error {
 
 	klaviyo := worker.NewKlaviyoClient(cfg.KlaviyoBaseURL, cfg.KlaviyoAPIKey)
 	wk := worker.NewWorker(s, klaviyo, cfg.MaxEventAge)
+	var wg sync.WaitGroup
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		if err := wk.Run(ctx, cfg.WorkerPollInterval); err != nil {
 			slog.Info("worker exited", "reason", err)
 		}
@@ -63,6 +73,28 @@ func run() error {
 		WriteTimeout:      15 * time.Second,
 		IdleTimeout:       60 * time.Second,
 	}
-	slog.Info("listening", "addr", addr)
-	return srv.ListenAndServe()
+
+	serverErr := make(chan error, 1)
+	go func() {
+		slog.Info("listening", "addr", addr)
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			serverErr <- err
+		}
+	}()
+
+	select {
+	case err := <-serverErr:
+		return err
+	case <-ctx.Done():
+		slog.Info("shutdown signal received")
+	}
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		slog.Error("http shutdown", "error", err)
+	}
+	wg.Wait()
+	slog.Info("shutdown complete")
+	return nil
 }
