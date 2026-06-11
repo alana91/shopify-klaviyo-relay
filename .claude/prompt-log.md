@@ -1863,3 +1863,15 @@ actually... on a server error we want to continue running the server I believe
 
 yes. then let's handle what I was confused about. after being up, if a server error happens and it's not handled, that shouldn't call a crash
 
+---
+
+## 2026-06-11T20:01:19Z
+
+good, but no need for debug.stack for now
+
+---
+
+## 2026-06-11T20:04:12Z
+
+I believe 1 is covered by other integration tests still getting responses and 2 seems overdoing
+
