@@ -1809,3 +1809,33 @@ I feel like @worker/payload.go content should just be in @worker/klaviyo.go inst
 
 commit it
 
+---
+
+## 2026-06-11T19:34:52Z
+
+/review
+
+---
+
+## 2026-06-11T19:38:26Z
+
+let's fix 1,2,4,5
+
+---
+
+## 2026-06-11T19:43:11Z
+
+why would we want to disable ssl locally, though. I never did that
+
+---
+
+## 2026-06-11T19:45:51Z
+
+what is the 1001 in the dockerfile?
+
+---
+
+## 2026-06-11T19:47:17Z
+
+you can commit
+
