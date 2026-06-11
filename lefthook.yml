@@ -1,0 +1,11 @@
+pre-commit:
+  commands:
+    fmt:
+      glob: "*.go"
+      run: go fmt ./...
+    tidy:
+      glob: "*.go"
+      run: go mod tidy
+    lint:
+      glob: "*.go"
+      run: golangci-lint run ./...
