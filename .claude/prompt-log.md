@@ -1875,3 +1875,27 @@ good, but no need for debug.stack for now
 
 I believe 1 is covered by other integration tests still getting responses and 2 seems overdoing
 
+---
+
+## 2026-06-11T20:05:26Z
+
+what is marinara?
+
+---
+
+## 2026-06-11T20:07:19Z
+
+about the TDD flow. when it fails because somethibng doesn't exist yet, we want to make the test and then create the thing that doesn't exist but do nothing or nothing much there. then we run with it expecting it to still fail. and only then we implement to make the test pass. please remember that and also add to claude.md
+
+---
+
+## 2026-06-11T20:08:54Z
+
+first revier claude.md and see if there's anything else we should add
+
+---
+
+## 2026-06-11T20:12:27Z
+
+yes
+
