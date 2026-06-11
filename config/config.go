@@ -8,7 +8,28 @@ import (
 )
 
 type Config struct {
+	DB                   DBConfig
 	ShopifyWebhookSecret string
+	Port                 string
+}
+
+func Load() (Config, error) {
+	db, err := LoadDB()
+	if err != nil {
+		return Config{}, err
+	}
+
+	secret, err := requireEnv("SHOPIFY_WEBHOOK_SECRET")
+	if err != nil {
+		return Config{}, err
+	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	return Config{DB: db, ShopifyWebhookSecret: secret, Port: port}, nil
 }
 
 type DBConfig struct {
