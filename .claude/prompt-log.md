@@ -524,3 +524,586 @@ let's do the temp remove
 
 ok, let's do it
 
+---
+
+## 2026-06-11T11:17:56Z
+
+let's fix our CI now, I want to see it working
+
+---
+
+## 2026-06-11T11:19:38Z
+
+2026-06-11T11:16:21.3725618Z Current runner version: '2.335.1'
+2026-06-11T11:16:21.3760069Z ##[group]Runner Image Provisioner
+2026-06-11T11:16:21.3761326Z Hosted Compute Agent
+2026-06-11T11:16:21.3762179Z Version: 20260527.539
+2026-06-11T11:16:21.3763286Z Commit: a891dd388383b896fa6ac04a82c0b75cec981078
+2026-06-11T11:16:21.3764793Z Build Date: 2026-05-27T21:39:57Z
+2026-06-11T11:16:21.3765959Z Worker ID: {9b1cd562-131b-4ea7-b1b8-50cbe94b9afd}
+2026-06-11T11:16:21.3767172Z Azure Region: eastus2
+2026-06-11T11:16:21.3768049Z ##[endgroup]
+2026-06-11T11:16:21.3770293Z ##[group]Operating System
+2026-06-11T11:16:21.3771309Z Ubuntu
+2026-06-11T11:16:21.3772185Z 24.04.4
+2026-06-11T11:16:21.3772989Z LTS
+2026-06-11T11:16:21.3774010Z ##[endgroup]
+2026-06-11T11:16:21.3774984Z ##[group]Runner Image
+2026-06-11T11:16:21.3775953Z Image: ubuntu-24.04
+2026-06-11T11:16:21.3776786Z Version: 20260607.184.1
+2026-06-11T11:16:21.3778836Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260607.184/images/ubuntu/Ubuntu2404-Readme.md
+2026-06-11T11:16:21.3782060Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260607.184
+2026-06-11T11:16:21.3783659Z ##[endgroup]
+2026-06-11T11:16:21.3785902Z ##[group]GITHUB_TOKEN Permissions
+2026-06-11T11:16:21.3788675Z Contents: read
+2026-06-11T11:16:21.3789537Z Metadata: read
+2026-06-11T11:16:21.3790607Z Packages: read
+2026-06-11T11:16:21.3791461Z ##[endgroup]
+2026-06-11T11:16:21.3794434Z Secret source: Actions
+2026-06-11T11:16:21.3795787Z Prepare workflow directory
+2026-06-11T11:16:21.4251748Z Prepare all required actions
+2026-06-11T11:16:21.4304754Z Getting action download info
+2026-06-11T11:16:21.8387190Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-06-11T11:16:21.9055710Z Download action repository 'actions/setup-go@v5' (SHA:40f1582b2485089dde7abd97c1529aa768e1baff)
+2026-06-11T11:16:22.1330299Z Download action repository 'golangci/golangci-lint-action@v6' (SHA:55c2c1448f86e01eaae002a5a3a9624417608d84)
+2026-06-11T11:16:22.4685173Z Complete job name: Lint & format
+2026-06-11T11:16:22.5430659Z ##[group]Run actions/checkout@v4
+2026-06-11T11:16:22.5431560Z with:
+2026-06-11T11:16:22.5432071Z   repository: alana91/shopify-klaviyo-relay
+2026-06-11T11:16:22.5437303Z   token: ***
+2026-06-11T11:16:22.5437790Z   ssh-strict: true
+2026-06-11T11:16:22.5438276Z   ssh-user: git
+2026-06-11T11:16:22.5438763Z   persist-credentials: true
+2026-06-11T11:16:22.5439304Z   clean: true
+2026-06-11T11:16:22.5439806Z   sparse-checkout-cone-mode: true
+2026-06-11T11:16:22.5440393Z   fetch-depth: 1
+2026-06-11T11:16:22.5440879Z   fetch-tags: false
+2026-06-11T11:16:22.5441379Z   show-progress: true
+2026-06-11T11:16:22.5441862Z   lfs: false
+2026-06-11T11:16:22.5442310Z   submodules: false
+2026-06-11T11:16:22.5442799Z   set-safe-directory: true
+2026-06-11T11:16:22.5443537Z ##[endgroup]
+2026-06-11T11:16:22.6572641Z Syncing repository: alana91/shopify-klaviyo-relay
+2026-06-11T11:16:22.6575115Z ##[group]Getting Git version info
+2026-06-11T11:16:22.6576194Z Working directory is '/home/runner/work/shopify-klaviyo-relay/shopify-klaviyo-relay'
+2026-06-11T11:16:22.6577460Z [command]/usr/bin/git version
+2026-06-11T11:16:22.6621824Z git version 2.54.0
+2026-06-11T11:16:22.6646883Z ##[endgroup]
+2026-06-11T11:16:22.6667964Z Temporarily overriding HOME='/home/runner/work/_temp/3d495b36-1fcd-444b-8f4c-fd8e63e0c559' before making global git config changes
+2026-06-11T11:16:22.6669524Z Adding repository directory to the temporary git global config as a safe directory
+2026-06-11T11:16:22.6673240Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/shopify-klaviyo-relay/shopify-klaviyo-relay
+2026-06-11T11:16:22.6716768Z Deleting the contents of '/home/runner/work/shopify-klaviyo-relay/shopify-klaviyo-relay'
+2026-06-11T11:16:22.6719695Z ##[group]Initializing the repository
+2026-06-11T11:16:22.6724998Z [command]/usr/bin/git init /home/runner/work/shopify-klaviyo-relay/shopify-klaviyo-relay
+2026-06-11T11:16:22.6795344Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-06-11T11:16:22.6796998Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-06-11T11:16:22.6798587Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-06-11T11:16:22.6799530Z hint: call:
+2026-06-11T11:16:22.6800303Z hint:
+2026-06-11T11:16:22.6801253Z hint:     git config --global init.defaultBranch <name>
+2026-06-11T11:16:22.6802404Z hint:
+2026-06-11T11:16:22.6803515Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-06-11T11:16:22.6805520Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-06-11T11:16:22.6806956Z hint:
+2026-06-11T11:16:22.6807748Z hint:     git branch -m <name>
+2026-06-11T11:16:22.6808637Z hint:
+2026-06-11T11:16:22.6809800Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-06-11T11:16:22.6812052Z Initialized empty Git repository in /home/runner/work/shopify-klaviyo-relay/shopify-klaviyo-relay/.git/
+2026-06-11T11:16:22.6815865Z [command]/usr/bin/git remote add origin https://github.com/alana91/shopify-klaviyo-relay
+2026-06-11T11:16:22.6852279Z ##[endgroup]
+2026-06-11T11:16:22.6853712Z ##[group]Disabling automatic garbage collection
+2026-06-11T11:16:22.6857221Z [command]/usr/bin/git config --local gc.auto 0
+2026-06-11T11:16:22.6887350Z ##[endgroup]
+2026-06-11T11:16:22.6888698Z ##[group]Setting up auth
+2026-06-11T11:16:22.6895034Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-06-11T11:16:22.6927255Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-06-11T11:16:22.7232666Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-06-11T11:16:22.7263478Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-06-11T11:16:22.7492945Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-06-11T11:16:22.7526426Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-06-11T11:16:22.7762906Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-06-11T11:16:22.7798895Z ##[endgroup]
+2026-06-11T11:16:22.7799830Z ##[group]Fetching the repository
+2026-06-11T11:16:22.7807878Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +1b41a33a4216f55d859884144e54df403f0baa5f:refs/remotes/origin/main
+2026-06-11T11:16:23.0377009Z From https://github.com/alana91/shopify-klaviyo-relay
+2026-06-11T11:16:23.0378296Z  * [new ref]         1b41a33a4216f55d859884144e54df403f0baa5f -> origin/main
+2026-06-11T11:16:23.0409101Z ##[endgroup]
+2026-06-11T11:16:23.0418495Z ##[group]Determining the checkout info
+2026-06-11T11:16:23.0426033Z ##[endgroup]
+2026-06-11T11:16:23.0426695Z [command]/usr/bin/git sparse-checkout disable
+2026-06-11T11:16:23.0462549Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-06-11T11:16:23.0493555Z ##[group]Checking out the ref
+2026-06-11T11:16:23.0495058Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-06-11T11:16:23.0562715Z Switched to a new branch 'main'
+2026-06-11T11:16:23.0566303Z branch 'main' set up to track 'origin/main'.
+2026-06-11T11:16:23.0575670Z ##[endgroup]
+2026-06-11T11:16:23.0612859Z [command]/usr/bin/git log -1 --format=%H
+2026-06-11T11:16:23.0637362Z 1b41a33a4216f55d859884144e54df403f0baa5f
+2026-06-11T11:16:23.0979501Z ##[group]Run actions/setup-go@v5
+2026-06-11T11:16:23.0980830Z with:
+2026-06-11T11:16:23.0981940Z   go-version: 1.26
+2026-06-11T11:16:23.0983108Z   check-latest: false
+2026-06-11T11:16:23.0996184Z   token: ***
+2026-06-11T11:16:23.0997937Z   cache: true
+2026-06-11T11:16:23.0999636Z ##[endgroup]
+2026-06-11T11:16:23.2676234Z Setup go version spec 1.26
+2026-06-11T11:16:23.2747876Z Attempting to download 1.26...
+2026-06-11T11:16:23.6775002Z matching 1.26...
+2026-06-11T11:16:23.6786147Z Acquiring 1.26.4 from https://github.com/actions/go-versions/releases/download/1.26.4-26891772857/go-1.26.4-linux-x64.tar.gz
+2026-06-11T11:16:24.1941554Z Extracting Go...
+2026-06-11T11:16:24.2043405Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/630e711a-b44a-4d04-9875-9239007e506e -f /home/runner/work/_temp/fe9a56c0-2bbc-4f81-85d3-4e87640e568d
+2026-06-11T11:16:25.9790443Z Successfully extracted go to /home/runner/work/_temp/630e711a-b44a-4d04-9875-9239007e506e
+2026-06-11T11:16:25.9791112Z Adding to the cache ...
+2026-06-11T11:16:30.5861709Z Successfully cached go to /opt/hostedtoolcache/go/1.26.4/x64
+2026-06-11T11:16:30.5862488Z Added go to the path
+2026-06-11T11:16:30.5865163Z Successfully set up Go version 1.26
+2026-06-11T11:16:30.6078634Z [command]/opt/hostedtoolcache/go/1.26.4/x64/bin/go env GOMODCACHE
+2026-06-11T11:16:30.6110881Z [command]/opt/hostedtoolcache/go/1.26.4/x64/bin/go env GOCACHE
+2026-06-11T11:16:30.6148862Z /home/runner/go/pkg/mod
+2026-06-11T11:16:30.6167564Z /home/runner/.cache/go-build
+2026-06-11T11:16:30.6934456Z Cache is not found
+2026-06-11T11:16:30.6957350Z go version go1.26.4 linux/amd64
+2026-06-11T11:16:30.6957626Z 
+2026-06-11T11:16:30.6958004Z ##[group]go env
+2026-06-11T11:16:30.8132669Z AR='ar'
+2026-06-11T11:16:30.8133088Z CC='gcc'
+2026-06-11T11:16:30.8133516Z CGO_CFLAGS='-O2 -g'
+2026-06-11T11:16:30.8134005Z CGO_CPPFLAGS=''
+2026-06-11T11:16:30.8134316Z CGO_CXXFLAGS='-O2 -g'
+2026-06-11T11:16:30.8134581Z CGO_ENABLED='1'
+2026-06-11T11:16:30.8134909Z CGO_FFLAGS='-O2 -g'
+2026-06-11T11:16:30.8135146Z CGO_LDFLAGS='-O2 -g'
+2026-06-11T11:16:30.8135377Z CXX='g++'
+2026-06-11T11:16:30.8135626Z GCCGO='gccgo'
+2026-06-11T11:16:30.8135924Z GO111MODULE=''
+2026-06-11T11:16:30.8136162Z GOAMD64='v1'
+2026-06-11T11:16:30.8136445Z GOARCH='amd64'
+2026-06-11T11:16:30.8136676Z GOAUTH='netrc'
+2026-06-11T11:16:30.8136890Z GOBIN=''
+2026-06-11T11:16:30.8137205Z GOCACHE='/home/runner/.cache/go-build'
+2026-06-11T11:16:30.8137569Z GOCACHEPROG=''
+2026-06-11T11:16:30.8137819Z GODEBUG=''
+2026-06-11T11:16:30.8138147Z GOENV='/home/runner/.config/go/env'
+2026-06-11T11:16:30.8138433Z GOEXE=''
+2026-06-11T11:16:30.8138664Z GOEXPERIMENT=''
+2026-06-11T11:16:30.8138899Z GOFIPS140='off'
+2026-06-11T11:16:30.8139119Z GOFLAGS=''
+2026-06-11T11:16:30.8139848Z GOGCCFLAGS='-fPIC -m64 -pthread -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=/tmp/go-build1465532693=/tmp/go-build -gno-record-gcc-switches'
+2026-06-11T11:16:30.8140584Z GOHOSTARCH='amd64'
+2026-06-11T11:16:30.8140849Z GOHOSTOS='linux'
+2026-06-11T11:16:30.8141083Z GOINSECURE=''
+2026-06-11T11:16:30.8141491Z GOMOD='/home/runner/work/shopify-klaviyo-relay/shopify-klaviyo-relay/go.mod'
+2026-06-11T11:16:30.8141933Z GOMODCACHE='/home/runner/go/pkg/mod'
+2026-06-11T11:16:30.8142238Z GONOPROXY=''
+2026-06-11T11:16:30.8142461Z GONOSUMDB=''
+2026-06-11T11:16:30.8142675Z GOOS='linux'
+2026-06-11T11:16:30.8142904Z GOPATH='/home/runner/go'
+2026-06-11T11:16:30.8143150Z GOPRIVATE=''
+2026-06-11T11:16:30.8143684Z GOPROXY='https://proxy.golang.org,direct'
+2026-06-11T11:16:30.8144316Z GOROOT='/opt/hostedtoolcache/go/1.26.4/x64'
+2026-06-11T11:16:30.8144641Z GOSUMDB='sum.golang.org'
+2026-06-11T11:16:30.8144899Z GOTELEMETRY='local'
+2026-06-11T11:16:30.8145191Z GOTELEMETRYDIR='/home/runner/.config/go/telemetry'
+2026-06-11T11:16:30.8145518Z GOTMPDIR=''
+2026-06-11T11:16:30.8145748Z GOTOOLCHAIN='auto'
+2026-06-11T11:16:30.8146088Z GOTOOLDIR='/opt/hostedtoolcache/go/1.26.4/x64/pkg/tool/linux_amd64'
+2026-06-11T11:16:30.8146471Z GOVCS=''
+2026-06-11T11:16:30.8147049Z GOVERSION='go1.26.4'
+2026-06-11T11:16:30.8147301Z GOWORK=''
+2026-06-11T11:16:30.8147533Z PKG_CONFIG='pkg-config'
+2026-06-11T11:16:30.8147690Z 
+2026-06-11T11:16:30.8148198Z ##[endgroup]
+2026-06-11T11:16:30.8325233Z ##[group]Run unformatted=$(gofmt -l .)
+2026-06-11T11:16:30.8325863Z ␛[36;1munformatted=$(gofmt -l .)␛[0m
+2026-06-11T11:16:30.8326190Z ␛[36;1mif [ -n "$unformatted" ]; then␛[0m
+2026-06-11T11:16:30.8326524Z ␛[36;1m  echo "Run 'go fmt ./...' to fix:"␛[0m
+2026-06-11T11:16:30.8326848Z ␛[36;1m  echo "$unformatted"␛[0m
+2026-06-11T11:16:30.8327111Z ␛[36;1m  exit 1␛[0m
+2026-06-11T11:16:30.8327338Z ␛[36;1mfi␛[0m
+2026-06-11T11:16:30.8450270Z shell: /usr/bin/bash -e {0}
+2026-06-11T11:16:30.8450588Z ##[endgroup]
+2026-06-11T11:16:30.8598346Z ##[group]Run go mod tidy
+2026-06-11T11:16:30.8598665Z ␛[36;1mgo mod tidy␛[0m
+2026-06-11T11:16:30.8598946Z ␛[36;1mgit diff --exit-code go.mod go.sum␛[0m
+2026-06-11T11:16:30.8633473Z shell: /usr/bin/bash -e {0}
+2026-06-11T11:16:30.8633983Z ##[endgroup]
+2026-06-11T11:16:30.8737968Z go: downloading github.com/evilmartians/lefthook/v2 v2.1.9
+2026-06-11T11:16:31.2264055Z go: downloading github.com/urfave/cli/v3 v3.9.0
+2026-06-11T11:16:31.2738058Z go: downloading github.com/gobwas/glob v0.2.3
+2026-06-11T11:16:31.2747792Z go: downloading github.com/kaptinlin/jsonschema v0.7.14
+2026-06-11T11:16:31.2830262Z go: downloading github.com/knadh/koanf/parsers/json v1.0.0
+2026-06-11T11:16:31.2924075Z go: downloading github.com/knadh/koanf/providers/rawbytes v1.0.0
+2026-06-11T11:16:31.3087151Z go: downloading github.com/knadh/koanf/v2 v2.3.4
+2026-06-11T11:16:31.3294436Z go: downloading github.com/spf13/afero v1.15.0
+2026-06-11T11:16:31.5547720Z go: downloading charm.land/lipgloss/v2 v2.0.3
+2026-06-11T11:16:31.5951377Z go: downloading github.com/briandowns/spinner v1.23.2
+2026-06-11T11:16:31.6172180Z go: downloading github.com/charmbracelet/colorprofile v0.4.3
+2026-06-11T11:16:31.6291341Z go: downloading github.com/charmbracelet/x/term v0.2.2
+2026-06-11T11:16:31.6384667Z go: downloading github.com/mattn/go-isatty v0.0.20
+2026-06-11T11:16:31.6487536Z go: downloading github.com/mattn/go-runewidth v0.0.23
+2026-06-11T11:16:31.6613187Z go: downloading github.com/schollz/progressbar/v3 v3.19.0
+2026-06-11T11:16:31.6956695Z go: downloading github.com/rogpeppe/go-internal v1.14.1
+2026-06-11T11:16:31.6957428Z go: downloading github.com/stretchr/testify v1.11.1
+2026-06-11T11:16:31.7385263Z go: downloading golang.org/x/mod v0.35.0
+2026-06-11T11:16:31.8032930Z go: downloading github.com/knadh/koanf/maps v0.1.2
+2026-06-11T11:16:31.8054640Z go: downloading github.com/knadh/koanf/parsers/toml/v2 v2.2.0
+2026-06-11T11:16:31.8074837Z go: downloading github.com/knadh/koanf/parsers/yaml v1.1.0
+2026-06-11T11:16:31.8134056Z go: downloading github.com/knadh/koanf/providers/fs v1.0.0
+2026-06-11T11:16:31.8135067Z go: downloading github.com/mitchellh/mapstructure v1.5.0
+2026-06-11T11:16:31.8250555Z go: downloading github.com/pelletier/go-toml/v2 v2.3.1
+2026-06-11T11:16:31.8288704Z go: downloading github.com/tidwall/jsonc v0.3.3
+2026-06-11T11:16:31.8629785Z go: downloading go.yaml.in/yaml/v3 v3.0.4
+2026-06-11T11:16:31.8804900Z go: downloading github.com/go-viper/mapstructure/v2 v2.4.0
+2026-06-11T11:16:31.8941083Z go: downloading github.com/mitchellh/copystructure v1.2.0
+2026-06-11T11:16:31.9035413Z go: downloading golang.org/x/text v0.37.0
+2026-06-11T11:16:32.0097852Z go: downloading github.com/charmbracelet/ultraviolet v0.0.0-20251205161215-1948445e3318
+2026-06-11T11:16:32.0365086Z go: downloading github.com/charmbracelet/x/ansi v0.11.7
+2026-06-11T11:16:32.0675393Z go: downloading github.com/clipperhouse/displaywidth v0.11.0
+2026-06-11T11:16:32.0852613Z go: downloading github.com/lucasb-eyer/go-colorful v1.4.0
+2026-06-11T11:16:32.1571404Z go: downloading github.com/rivo/uniseg v0.4.7
+2026-06-11T11:16:32.1998518Z go: downloading golang.org/x/sys v0.43.0
+2026-06-11T11:16:32.3722445Z go: downloading github.com/fatih/color v1.18.0
+2026-06-11T11:16:32.3723566Z go: downloading golang.org/x/term v0.41.0
+2026-06-11T11:16:32.3729241Z go: downloading github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e
+2026-06-11T11:16:32.3898228Z go: downloading github.com/clipperhouse/uax29/v2 v2.7.0
+2026-06-11T11:16:32.3921925Z go: downloading github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
+2026-06-11T11:16:32.3930971Z go: downloading github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2
+2026-06-11T11:16:32.4135724Z go: downloading github.com/go-json-experiment/json v0.0.0-20260505212615-e40f80bf6836
+2026-06-11T11:16:32.4158035Z go: downloading github.com/goccy/go-yaml v1.19.2
+2026-06-11T11:16:32.4240037Z go: downloading github.com/kaptinlin/go-i18n v0.4.8
+2026-06-11T11:16:32.4761907Z go: downloading github.com/kaptinlin/jsonpointer v0.4.23
+2026-06-11T11:16:32.4872424Z go: downloading github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db
+2026-06-11T11:16:32.5433579Z go: downloading github.com/chengxilo/virtualterm v1.0.4
+2026-06-11T11:16:32.5801901Z go: downloading gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
+2026-06-11T11:16:32.6007640Z go: downloading github.com/mitchellh/reflectwalk v1.0.2
+2026-06-11T11:16:32.6097580Z go: downloading github.com/charmbracelet/x/termios v0.1.1
+2026-06-11T11:16:32.6198686Z go: downloading github.com/charmbracelet/x/windows v0.2.2
+2026-06-11T11:16:32.6292793Z go: downloading github.com/muesli/cancelreader v0.2.2
+2026-06-11T11:16:32.6398205Z go: downloading golang.org/x/sync v0.20.0
+2026-06-11T11:16:32.6524887Z go: downloading github.com/mattn/go-colorable v0.1.13
+2026-06-11T11:16:32.6614954Z go: downloading golang.org/x/exp v0.0.0-20231006140011-7918f672742d
+2026-06-11T11:16:32.6759826Z go: downloading gopkg.in/yaml.v3 v3.0.1
+2026-06-11T11:16:32.7059155Z go: downloading golang.org/x/tools v0.44.0
+2026-06-11T11:16:32.7497498Z go: downloading github.com/kr/pretty v0.3.1
+2026-06-11T11:16:32.7530485Z go: downloading github.com/alessio/shellescape v1.4.1
+2026-06-11T11:16:32.7531143Z go: downloading github.com/creack/pty v1.1.24
+2026-06-11T11:16:32.7678436Z go: downloading github.com/mattn/go-tty v0.0.7
+2026-06-11T11:16:32.7703280Z go: downloading github.com/bmatcuk/doublestar/v4 v4.10.0
+2026-06-11T11:16:32.7824743Z go: downloading github.com/gabriel-vasile/mimetype v1.4.13
+2026-06-11T11:16:32.7825818Z go: downloading github.com/google/go-cmp v0.7.0
+2026-06-11T11:16:32.8228050Z go: downloading github.com/kaptinlin/messageformat-go v0.6.4
+2026-06-11T11:16:32.8374224Z go: downloading github.com/kr/text v0.2.0
+2026-06-11T11:16:33.1577092Z ##[group]Run golangci/golangci-lint-action@v6
+2026-06-11T11:16:33.1577438Z with:
+2026-06-11T11:16:33.1577666Z   install-mode: binary
+2026-06-11T11:16:33.1580684Z   github-token: ***
+2026-06-11T11:16:33.1580936Z   verify: true
+2026-06-11T11:16:33.1581170Z   only-new-issues: false
+2026-06-11T11:16:33.1581423Z   skip-cache: false
+2026-06-11T11:16:33.1581674Z   skip-save-cache: false
+2026-06-11T11:16:33.1581925Z   problem-matchers: false
+2026-06-11T11:16:33.1582193Z   cache-invalidation-interval: 7
+2026-06-11T11:16:33.1582467Z ##[endgroup]
+2026-06-11T11:16:33.3280943Z ##[group]prepare environment
+2026-06-11T11:16:33.3285404Z Checking for go.mod: go.mod
+2026-06-11T11:16:33.4256744Z Cache not found for input keys: golangci-lint.cache-Linux-2945-3435196e60db6d3a81e4b2472f39d47e2ae7f464, golangci-lint.cache-Linux-2945-
+2026-06-11T11:16:33.4258217Z Finding needed golangci-lint version...
+2026-06-11T11:16:33.4262018Z Installation mode: binary
+2026-06-11T11:16:33.4262889Z Installing golangci-lint binary v1.64.8...
+2026-06-11T11:16:33.4265444Z Downloading binary https://github.com/golangci/golangci-lint/releases/download/v1.64.8/golangci-lint-1.64.8-linux-amd64.tar.gz ...
+2026-06-11T11:16:33.6519853Z [command]/usr/bin/tar xz --overwrite --warning=no-unknown-keyword --overwrite -C /home/runner -f /home/runner/work/_temp/a98c497c-b10a-4fd9-9e31-07156d4b8d0c
+2026-06-11T11:16:33.8880064Z Installed golangci-lint into /home/runner/golangci-lint-1.64.8-linux-amd64/golangci-lint in 461ms
+2026-06-11T11:16:33.8880832Z Prepared env in 560ms
+2026-06-11T11:16:33.8882056Z ##[endgroup]
+2026-06-11T11:16:33.8884302Z ##[group]run golangci-lint
+2026-06-11T11:16:33.8889884Z Running [/home/runner/golangci-lint-1.64.8-linux-amd64/golangci-lint config path] in [/home/runner/work/shopify-klaviyo-relay/shopify-klaviyo-relay] ...
+2026-06-11T11:16:33.9734191Z Running [/home/runner/golangci-lint-1.64.8-linux-amd64/golangci-lint run] in [/home/runner/work/shopify-klaviyo-relay/shopify-klaviyo-relay] ...
+2026-06-11T11:16:34.0571699Z Error: can't load config: the Go language version (go1.24) used to build golangci-lint is lower than the targeted Go version (1.26.4)
+2026-06-11T11:16:34.0573229Z Failed executing command with error: can't load config: the Go language version (go1.24) used to build golangci-lint is lower than the targeted Go version (1.26.4)
+2026-06-11T11:16:34.0574308Z 
+2026-06-11T11:16:34.0600352Z ##[error]golangci-lint exit with code 3
+2026-06-11T11:16:34.0611532Z Ran golangci-lint in 84ms
+2026-06-11T11:16:34.0612280Z ##[endgroup]
+2026-06-11T11:16:34.0771032Z Post job cleanup.
+2026-06-11T11:16:34.2601436Z [warning] Path Validation Error: Path(s) specified in the action for caching do(es) not exist, hence no cache is being saved.
+2026-06-11T11:16:34.2774599Z Post job cleanup.
+2026-06-11T11:16:34.3801043Z [command]/usr/bin/git version
+2026-06-11T11:16:34.3837306Z git version 2.54.0
+2026-06-11T11:16:34.3880164Z Temporarily overriding HOME='/home/runner/work/_temp/1162cea6-ac7f-40d5-89e1-66613df7b752' before making global git config changes
+2026-06-11T11:16:34.3881513Z Adding repository directory to the temporary git global config as a safe directory
+2026-06-11T11:16:34.3895029Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/shopify-klaviyo-relay/shopify-klaviyo-relay
+2026-06-11T11:16:34.3930693Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-06-11T11:16:34.3963942Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-06-11T11:16:34.4201263Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-06-11T11:16:34.4225512Z http.https://github.com/.extraheader
+2026-06-11T11:16:34.4237057Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-06-11T11:16:34.4268407Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-06-11T11:16:34.4497668Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-06-11T11:16:34.4528349Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-06-11T11:16:34.4871170Z Cleaning up orphan processes
+2026-06-11T11:16:34.5149392Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-go@v5, golangci/golangci-lint-action@v6. Actions will be forced to run with Node.js 24 by default starting June 16th, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+
+---
+
+## 2026-06-11T11:22:23Z
+
+I'm seeing the same errors
+
+---
+
+## 2026-06-11T11:25:43Z
+
+take a look around at what we have in the repo so far and then let's start following @plan.md on the first vertical implementation.
+
+---
+
+## 2026-06-11T11:29:47Z
+
+2
+
+---
+
+## 2026-06-11T11:30:45Z
+
+1
+
+---
+
+## 2026-06-11T11:32:37Z
+
+let's actually change the code to compare to the real expected now, not nil
+
+---
+
+## 2026-06-11T11:34:46Z
+
+I was reading shopify docs and I'm not sure hmac makes sense at all. This does not seem to be included in a flow where a post is done to a webhook
+
+---
+
+## 2026-06-11T11:41:04Z
+
+ok, you're correct. let's continue. we need to simulate the situation where we have a secret and valid and invalid hmac. as I understand this can be generated from the request so we can mock it so to say?
+
+---
+
+## 2026-06-11T11:43:24Z
+
+this doesn't make sense, we're not running it against our env SHOPIFY_WEBHOOK_SECRET. How are we actually validating anything here
+
+---
+
+## 2026-06-11T11:45:48Z
+
+this test makes no sense. You're testing the lib basically. No need to read the env but there are better ways to do this. For example, inject our config, so we can mock it, and so we don't need to read any envs and we can test it.
+
+---
+
+## 2026-06-11T11:47:33Z
+
+that import makes no sense
+
+---
+
+## 2026-06-11T11:49:26Z
+
+what we want to do now is inject configs so we cant test the secret against our actual SHOPIFY_WEBHOOK_SECRET
+
+---
+
+## 2026-06-11T11:52:43Z
+
+it was number 2, not number 1. Config should be part of server
+
+---
+
+## 2026-06-11T11:55:33Z
+
+go.mod package name is wrong. my username is alana91. please also double check if this convention is correct.
+
+---
+
+## 2026-06-11T11:59:27Z
+
+let's not make the middlware function a function of server struct. We want it to receive the config is a parameter, and work with that. It'll become much more simple.
+
+---
+
+## 2026-06-11T12:00:52Z
+
+before this, let't commit only our go.mod fix
+
+---
+
+## 2026-06-11T12:03:07Z
+
+let's fix old commits that have co-authored by Alana Domit Bittar etc etc. This happened because this is a new machine and I forgot to do git config for user and email, I believe.
+
+---
+
+## 2026-06-11T12:04:58Z
+
+continue please
+
+---
+
+## 2026-06-11T12:09:03Z
+
+not sure what you wanted to check. but we're missing a test for 400 status in the middleware test. also TDD was not followed correctly here but let's try better moving on.
+
+---
+
+## 2026-06-11T12:11:36Z
+
+why did you use errReader only for this case?
+
+---
+
+## 2026-06-11T12:12:43Z
+
+no, it's fine. That makes sense.
+
+---
+
+## 2026-06-11T12:14:47Z
+
+I believe we can start way smaller than that. For example, with functions that will actually handle the logic, not the handler (unless it's no currently recommended, I'd like to split that from the handler?
+
+---
+
+## 2026-06-11T12:15:32Z
+
+sorry, interrupted by mistake. continue as was, please
+
+---
+
+## 2026-06-11T12:17:50Z
+
+2
+
+---
+
+## 2026-06-11T12:18:35Z
+
+1
+
+---
+
+## 2026-06-11T12:20:10Z
+
+do we not forward only specific data instead of the whole json?
+
+---
+
+## 2026-06-11T12:21:29Z
+
+yes
+
+---
+
+## 2026-06-11T12:22:55Z
+
+are we guaranteed shopify will always send those? do we need to handle the possibility of not receiving them (this is a question, don't implement anything related to it yet)?
+
+---
+
+## 2026-06-11T12:24:52Z
+
+yes, invalid-JSON case then revisit validation at the handler. we'll think about that later depending on what klaviyo actually accepts, too.
+
+---
+
+## 2026-06-11T12:26:19Z
+
+the test is a bit too chaotic
+
+---
+
+## 2026-06-11T12:28:02Z
+
+it used to be we didn't use reflect in tests. Did that practice change?
+
+---
+
+## 2026-06-11T12:30:48Z
+
+don't go tests have asserts?
+
+---
+
+## 2026-06-11T12:32:04Z
+
+it's ok. But the message in the error of the first test is not gonna be helpful as it doesn't sign exactly what is not equal, but gives the whole struct to compare instead. That needs to be improved.
+
+---
+
+## 2026-06-11T12:33:35Z
+
+that's a bit complicated to read but let's move on for now.
+
+---
+
+## 2026-06-11T12:35:20Z
+
+let's detail that, yes.
+
+---
+
+## 2026-06-11T12:39:38Z
+
+Agreed with everything but integration test gated. In my experience, as long as they're not taking forever, they should be non negotiable. They'll not take forever for us, so they're non negotiable. But I want a logic that call store to insert etc to be separate, perhaps put it in order.go. That function should get store as a dependency.
+
+---
+
+## 2026-06-11T12:46:16Z
+
+the handler should actually parse the input. then the rest is done in the orchestration. parsing input is handler domain. so, or ochestrating function will get a parsed input already.
+
+---
+
+## 2026-06-11T12:49:35Z
+
+let's force the TEST_DATABASE_URL to be present
+
+---
+
+## 2026-06-11T12:54:16Z
+
+let's build that test url as we build the other, running one. So, we don't expect a full TEST_DATABASE_URL
+
+---
+
+## 2026-06-11T12:56:12Z
+
+actually. what I prefer here is the following. we create and drop a test database programatically for test. we don't expect it to be up already
+
+---
+
+## 2026-06-11T13:02:45Z
+
+Goose, and we should auto run migrations at startup
+
+---
+
+## 2026-06-11T13:19:32Z
+
+@internal/testdb/testdb.go we don't want to require a TEST_DATABASE_URL anymore. We want to get the env vars such as user etc and then build it from it. I'm not sure how we get them, if importing config (a little odd to me but possibly the best way). Maybe a good idea is a test config instead. BUt we don't want to get the whole url minus database name from the env.
+
+---
+
+## 2026-06-11T13:31:06Z
+
+the change in makefile is to run tests locally. What if we want to run inside docker?
+
+---
+
+## 2026-06-11T13:34:04Z
+
+why use an image that is not our own? that makes testing a bit invalid
+
+---
+
+## 2026-06-11T13:38:50Z
+
+we're actually at a point that we should commit some things
+
