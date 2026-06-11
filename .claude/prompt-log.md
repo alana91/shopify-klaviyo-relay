@@ -1683,3 +1683,51 @@ let's commit it together
 
 commit the prompt  now too
 
+---
+
+## 2026-06-11T18:40:02Z
+
+let's take a look around for no leaks again
+
+---
+
+## 2026-06-11T18:40:31Z
+
+let's take a look around for no leaks again (db or connection closing not deferred)
+
+---
+
+## 2026-06-11T18:42:20Z
+
+yes
+
+---
+
+## 2026-06-11T18:45:07Z
+
+git push
+
+---
+
+## 2026-06-11T18:47:02Z
+
+I think @.gitmessage is in the wrong place. if I'm not mistaken it can be put somewhere to load automatically to anyone using the repo when comming
+
+---
+
+## 2026-06-11T18:49:27Z
+
+yes, add the setup target and readme line.
+
+---
+
+## 2026-06-11T18:52:31Z
+
+I believe or readme could use more details. Add also the project structure in it
+
+---
+
+## 2026-06-11T18:55:58Z
+
+commit the prompt log
+
