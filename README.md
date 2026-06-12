@@ -74,6 +74,20 @@ make send-webhook
 
 This fires a fake Shopify `orders/create` payload with a valid HMAC signature. The service verifies the signature, stores the order with status `received`, and returns the new event id as JSON.
 
+## API docs
+
+With the service running, Swagger UI is served at [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html) (raw spec at `/swagger/doc.json`). The UI assets are embedded in the binary, so the docs work offline — nothing is loaded from a CDN.
+
+The spec is **generated, not hand-written**: [swaggo/swag](https://github.com/swaggo/swag) reads the annotation comments on the handlers in `api/handler.go` (plus the general info block above `main()` in `main.go`) and derives the schemas from the actual request/response structs. To regenerate after changing an annotation or a struct:
+
+```bash
+make docs
+```
+
+This runs `swag` via Go's tool dependency mechanism (`go tool swag init`), so it needs no separate install — the pinned version lives in `go.mod`. The output is checked in under `docs/` (`docs.go` plus `swagger.json`/`swagger.yaml`), and the pre-commit hook reruns `make docs` and stages the result whenever Go files change, so the committed spec can't drift from the code.
+
+The generated format is Swagger 2.0: stable swag does not emit OpenAPI 3.x. The webhook's `X-Shopify-Hmac-SHA256` header is documented as an `apiKey` security scheme because that's the closest Swagger 2.0 concept — it is really a per-request HMAC signature of the body, which Swagger UI's "Authorize" box cannot compute; use `make send-webhook` to send a correctly signed request.
+
 ## Development
 
 ```bash
@@ -125,7 +139,9 @@ These are deliberately out of scope for now but are the natural next steps:
 │   ├── middleware.go        # Shopify HMAC signature verification
 │   ├── handler.go           # webhook ingest, events JSON API, and dashboard handlers
 │   ├── order.go             # Shopify order parsing and persistence
+│   ├── docs.go              # Swagger UI handler (assets embedded by http-swagger)
 │   └── index.html           # dashboard, embedded via //go:embed; polls the events API
+├── docs/                    # generated Swagger 2.0 spec — do not edit; regenerate with make docs
 ├── store/                   # persistence layer — hand-written SQL over database/sql + pgx
 │   ├── store.go             # Store: InsertEvent, PendingEvents, Mark*, ListEvents, CountEvents
 │   ├── migrate.go           # embedded goose migrations, run automatically at startup
@@ -140,7 +156,7 @@ These are deliberately out of scope for now but are the natural next steps:
 ├── docker-compose.yml       # app + Postgres for local development
 ├── Dockerfile
 ├── Makefile                 # dev tasks (run `make help`)
-├── lefthook.yml             # pre-commit hooks (fmt, tidy, lint)
+├── lefthook.yml             # pre-commit hooks (fmt, tidy, docs, lint)
 └── plan.md                  # original design plan (see note below); may differ from the current code
 ```
 
