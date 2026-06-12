@@ -19,6 +19,15 @@ import (
 
 const shutdownTimeout = 10 * time.Second
 
+// @title			Shopify Klaviyo Relay
+// @version		1.0
+// @description	Receives Shopify order webhooks and relays them to Klaviyo as Placed Order events, with retries.
+// @BasePath		/
+//
+// @securityDefinitions.apikey	ShopifyHmac
+// @in							header
+// @name						X-Shopify-Hmac-SHA256
+// @description				Base64 HMAC-SHA256 signature of the raw request body, computed with the shared webhook secret. Not a static key — Swagger UI cannot generate it; use scripts/send_webhook.sh to send a signed request.
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
 
@@ -63,6 +72,7 @@ func run() error {
 	mux.Handle("POST /webhook/shopify/orders", api.VerifyShopifyHMAC(&cfg, api.HandleWebhook(s)))
 	mux.Handle("GET /api/events", api.HandleEvents(s))
 	mux.Handle("GET /{$}", api.HandleIndex())
+	mux.Handle("GET /swagger/", api.HandleDocs())
 
 	addr := ":" + cfg.Port
 	srv := &http.Server{

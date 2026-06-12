@@ -1,4 +1,4 @@
-.PHONY: setup fmt lint tidy check build test test-docker up db-reset seed-db send-webhook send-bad-webhook help
+.PHONY: setup fmt lint tidy check build docs test test-docker up db-reset seed-db send-webhook send-bad-webhook help
 
 ifneq (,$(wildcard .env))
 include .env
@@ -25,6 +25,9 @@ check: fmt tidy lint ## Format, tidy, and lint
 
 build: ## Build binary to bin/relay
 	go build -o bin/relay .
+
+docs: ## Regenerate Swagger docs from annotations
+	go tool swag init --generalInfo main.go --output docs
 
 test: ## Run tests with race detector (local; Postgres reached at localhost)
 	DB_HOST=localhost go test -race ./...

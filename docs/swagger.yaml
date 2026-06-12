@@ -1,0 +1,147 @@
+basePath: /
+definitions:
+  api.LineItem:
+    properties:
+      price:
+        type: string
+      quantity:
+        type: integer
+      title:
+        type: string
+    type: object
+  api.ShopifyOrder:
+    properties:
+      created_at:
+        type: string
+      currency:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      line_items:
+        items:
+          $ref: '#/definitions/api.LineItem'
+        type: array
+      name:
+        type: string
+      total_price:
+        type: string
+    type: object
+  api.eventResponse:
+    properties:
+      created_at:
+        type: string
+      last_error:
+        type: string
+      order_id:
+        type: integer
+      retry_count:
+        type: integer
+      status:
+        enum:
+        - received
+        - retrying
+        - succeeded
+        - failed
+        - expired
+        type: string
+    type: object
+  api.eventsPage:
+    properties:
+      events:
+        items:
+          $ref: '#/definitions/api.eventResponse'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  api.webhookResponse:
+    properties:
+      id:
+        format: uuid
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Receives Shopify order webhooks and relays them to Klaviyo as Placed
+    Order events, with retries.
+  title: Shopify Klaviyo Relay
+  version: "1.0"
+paths:
+  /api/events:
+    get:
+      parameters:
+      - default: 1
+        description: Page number; values below 1 are clamped to 1
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - default: 50
+        description: Page size; clamped to [1,100]
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.eventsPage'
+        "500":
+          description: internal error
+          schema:
+            type: string
+      summary: List relay events
+  /webhook/shopify/orders:
+    post:
+      consumes:
+      - application/json
+      description: Stores the order for asynchronous relay to Klaviyo. The raw request
+        body is capped at 1 MiB and must carry a valid HMAC signature.
+      parameters:
+      - description: Shopify order payload
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/api.ShopifyOrder'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.webhookResponse'
+        "400":
+          description: invalid payload
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "500":
+          description: internal error
+          schema:
+            type: string
+      security:
+      - ShopifyHmac: []
+      summary: Receive a Shopify order webhook
+securityDefinitions:
+  ShopifyHmac:
+    description: Base64 HMAC-SHA256 signature of the raw request body, computed with
+      the shared webhook secret. Not a static key — Swagger UI cannot generate it;
+      use scripts/send_webhook.sh to send a signed request.
+    in: header
+    name: X-Shopify-Hmac-SHA256
+    type: apiKey
+swagger: "2.0"

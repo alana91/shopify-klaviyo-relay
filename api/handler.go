@@ -31,7 +31,7 @@ func HandleIndex() http.Handler {
 
 type eventResponse struct {
 	OrderID    int64     `json:"order_id"`
-	Status     string    `json:"status"`
+	Status     string    `json:"status" enums:"received,retrying,succeeded,failed,expired"`
 	RetryCount int       `json:"retry_count"`
 	LastError  string    `json:"last_error"`
 	CreatedAt  time.Time `json:"created_at"`
@@ -44,6 +44,13 @@ type eventsPage struct {
 	Total  int             `json:"total"`
 }
 
+// @Summary	List relay events
+// @Produce	json
+// @Param		page	query		int	false	"Page number; values below 1 are clamped to 1"	default(1)	minimum(1)
+// @Param		limit	query		int	false	"Page size; clamped to [1,100]"					default(50)	minimum(1)	maximum(100)
+// @Success	200		{object}	eventsPage
+// @Failure	500		{string}	string	"internal error"
+// @Router		/api/events [get]
 func HandleEvents(s *store.Store) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		page := queryInt(r, "page", 1, 1, 0)
@@ -103,6 +110,21 @@ func queryInt(r *http.Request, key string, def, min, max int) int {
 	return v
 }
 
+type webhookResponse struct {
+	ID string `json:"id" format:"uuid"`
+}
+
+// @Summary		Receive a Shopify order webhook
+// @Description	Stores the order for asynchronous relay to Klaviyo. The raw request body is capped at 1 MiB and must carry a valid HMAC signature.
+// @Accept			json
+// @Produce		json
+// @Param			order	body		ShopifyOrder	true	"Shopify order payload"
+// @Success		200		{object}	webhookResponse
+// @Failure		400		{string}	string	"invalid payload"
+// @Failure		401		{string}	string	"unauthorized"
+// @Failure		500		{string}	string	"internal error"
+// @Security		ShopifyHmac
+// @Router			/webhook/shopify/orders [post]
 func HandleWebhook(s *store.Store) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
@@ -128,7 +150,7 @@ func HandleWebhook(s *store.Store) http.Handler {
 
 		slog.Info("webhook stored", "id", id, "shopify_order_id", order.ID)
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(map[string]string{"id": id}); err != nil {
+		if err := json.NewEncoder(w).Encode(webhookResponse{ID: id}); err != nil {
 			slog.Error("encode response", "error", err)
 		}
 	})
